@@ -17,7 +17,7 @@ futures = "0.1"
 base64 = "0.2"
 rust-crypto="^0.2"
 # pretty_env_logger = "0.1"
-# reqwest = "0.6.2" # Disbled because of collision of openssl-sys (Error Source: serenity, Ability to remove: None)
+reqwest = "0.6.2"
 
 [dependencies.serenity]
 version = "0.3"

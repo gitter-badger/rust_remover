@@ -1,7 +1,3 @@
-// TODO Wait on Dependency for reqwest (0.9 instead of 0.7 of openssl-sys)
-/*
-
-
 static API_BASE_URL: &'static str = "https://www.cleverbot.com/getreply";
 
 use utils;
@@ -85,10 +81,10 @@ impl CleverbotSession {
             conversation_id: String::new()
         }
     }
-}*/
+}
 
  // Stubs
-
+/*
  pub struct Cleverbot;
 
  impl Cleverbot {
@@ -101,4 +97,4 @@ impl CleverbotSession {
          }
          Ok(String::from("This is the Ok Method stub of Cleverbot"))
      }
- }
+ }*/
