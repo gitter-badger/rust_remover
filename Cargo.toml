@@ -20,7 +20,7 @@ rust-crypto="^0.2"
 # reqwest = "0.6.2" # Disbled because of collision of openssl-sys (Error Source: serenity, Ability to remove: None)
 
 [dependencies.serenity]
-version = "*"
+version = "0.3"
 features = ["framework", "cache"]
 
 [dependencies.url]
