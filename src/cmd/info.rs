@@ -4,7 +4,7 @@ use time;
 use utils::sharekvp::{StartupTime, ReducedReadyPayload};
 
 // Add additional content
-command!(status(_context) {
+command!(status(_context, message) {
     let ca = CACHE.read().unwrap();
     let uri = ca.user.avatar_url().unwrap();
 
@@ -13,7 +13,7 @@ command!(status(_context) {
     let rpayload = data.get::<ReducedReadyPayload>().unwrap();
     let tnow: Tm = time::now();
 
-    if let Err(why) = _context.channel_id.unwrap().send_message(
+    if let Err(why) = message.channel_id.send_message(
         |m| m.content(" ").embed(
             |e| e.author(
                 |a| a.icon_url(uri.as_str()).name(ca.user.name.as_str())

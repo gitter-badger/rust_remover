@@ -11,7 +11,7 @@ impl Key for CommandCounter {
 pub struct StartupTime;
 
 impl Key for StartupTime {
-    type Value = Tm;
+    type Value = Tm; // TODO Change to chrono's DateTime<LocalTime>
 }
 
 #[derive(Debug)]

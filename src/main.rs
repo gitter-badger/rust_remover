@@ -11,7 +11,8 @@ extern crate serde;
 extern crate serde_json;
 extern crate crypto;
 extern crate url;
-// extern crate reqwests;
+extern crate reqwest;
+extern crate chrono;
 
 // Custom "Crates -> Modules"
 mod cmd;
@@ -26,6 +27,8 @@ use std::env;
 use std::collections::HashMap;
 use std::fmt::Write;
 use utils::sharekvp::{CommandCounter, StartupTime, ReducedReadyPayload};
+use chrono::prelude::*;
+use chrono::offset::LocalResult;
 
 const CLIENT_PREFIX: &'static str = "x?";
 
@@ -128,15 +131,15 @@ fn main() {
                    .command("stats", |c| c.bucket("complicated").exec(cmd::info::status).desc("Gives Status infos about the bot"))
                    .command("help", |c| c.exec_help(help_commands::with_embeds).bucket("short"))
                    .command("embed", |c|
-                            c.exec(cmd::utils::embed)
+                            c.exec(cmd::utilcmd::embed)
                             .check(owner_check)
                             .desc("Create an Custom embed. OWNER ONLY"))
                    .command("purge_self", |c|
-                            c.exec(cmd::utils::purge_self)
+                            c.exec(cmd::utilcmd::purge_self)
                             .check(owner_check)
                             .desc("Purges x bot messages"))
                    .command("purge", |c|
-                            c.exec(cmd::utils::purge)
+                            c.exec(cmd::utilcmd::purge)
                             .check(owner_check)
                             .desc("Purges x messages")))
             .group("Cleverbot", |g|
@@ -211,13 +214,13 @@ command!(ping(_context, message) {
 #[allow(unused_variables)]
 command!(say(_context, message, _args, text: String) {
     if _args[0] == ":embed" {
-        let _ = _context.channel_id.unwrap().send_message(
+        let _ = message.channel_id.send_message(
             |m| m.content(" ").embed(
                 |e| e.description(_args[1..].join(" ").as_ref())
             )
         );
     } else {
-        let _ = _context.channel_id.unwrap().send_message(
+        let _ = message.channel_id.send_message(
             |m| m.content(_args.join(" ").as_ref())
         );
     }

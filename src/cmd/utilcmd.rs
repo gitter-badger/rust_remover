@@ -4,6 +4,8 @@ use serenity::model::{Message, MessageId, UserId};
 use serenity::client::Context;
 use serenity::model::permissions::MANAGE_MESSAGES;
 use time;
+use chrono::prelude::*;
+use chrono::offset::LocalResult;
 
 command!(embed(_ctx, msg, _args, text: String) {
     let s: String = _args.join(" ");
@@ -40,17 +42,18 @@ fn purge_messages(_ctx: &mut Context, msg: &Message, amount: u64, user: Option<U
                         return false;
                     }
                 }
-                let mut tmstmp = p.timestamp.clone();
-                let _ = tmstmp.drain(19..26); // Discard Miliseconds
+                let mut ptime = p.timestamp.clone();
+                //let mut tmstmp = p.timestamp.clone();                
+                /*let _ = tmstmp.drain(19..26); // Discard Miliseconds
                 let ptime = match time::strptime(tmstmp.as_str(), "%Y-%m-%dT%H:%M:%S%z") {
                     Ok(time) => time,
                     Err(e) => {
                         info!("Timeparse for msg {:?} failed: {:?}", p.id, e);
                         return false;
                     }
-                };
-                let ctime = time::now();
-                let delta = ctime - ptime;
+                };*/
+                let ctime = Local::now();
+                let delta = ctime.signed_duration_since(ptime);
                 if delta.num_days() > 11 {
                     return false;
                 }

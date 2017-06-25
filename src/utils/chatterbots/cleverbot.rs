@@ -35,7 +35,7 @@ impl Cleverbot {
         }
 
 
-        let url = API_BASE_URL.to_owned() + "?" + utils::params_to_www_form_url_encoded(&params).as_str();
+        let url = API_BASE_URL.to_owned() + "?" + utils::http_utils::params_to_www_form_url_encoded(&params).as_str();
 
         let mut response = reqwest::get(url.as_str()).unwrap();
 
