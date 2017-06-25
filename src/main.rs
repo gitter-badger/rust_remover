@@ -5,7 +5,6 @@
 
 // Normal Imports
 extern crate log4rs;
-extern crate time;
 extern crate typemap;
 extern crate serde;
 extern crate serde_json;
@@ -28,7 +27,7 @@ use std::env;
 use std::collections::HashMap;
 use std::fmt::Write;
 use utils::sharekvp::{CommandCounter, StartupTime, ReducedReadyPayload};
-use chrono::prelude::*;
+use chrono::prelude::{DateTime, Local};
 use chrono::offset::LocalResult;
 
 const CLIENT_PREFIX: &'static str = "x?";
@@ -38,11 +37,11 @@ const CLIENT_PREFIX: &'static str = "x?";
 fn main() {
 
     // Get token from file & login
-    let mut client = Client::login(&env::var("DISCORD_TOKEN").expect("token"));
     let logfile = match env::var("RUST_REMOVER_LOG4RS") {
         Ok(file) => file,
         Err(_) => String::from("log4rs.yml")
     };
+    let mut client = Client::login(&env::var("DISCORD_TOKEN").expect("token"));
     // Init Logger
     log4rs::init_file(logfile, Default::default()).unwrap();
 
@@ -52,7 +51,7 @@ fn main() {
     {
         let mut data = client.data.lock().unwrap();
         data.insert::<CommandCounter>(HashMap::default());
-        data.insert::<StartupTime>(time::now());
+        data.insert::<StartupTime>(Local::now());
     }
     // Contruct avalible commands
     debug!("Contructing framework...");

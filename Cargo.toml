@@ -8,7 +8,6 @@ description = "Privat Discord bot with (soon to be) Cleverbot Integration & many
 [dependencies]
 log = "0.3.7"
 log4rs = "0.6.3"
-time = "*" # Soon to be replaces by chrono as serenity uses it too
 typemap = "0.3.*"
 serde_json = "1"
 serde = "1"

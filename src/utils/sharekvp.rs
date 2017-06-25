@@ -1,6 +1,6 @@
 use typemap::Key;
 use std::collections::HashMap;
-use time::Tm;
+use chrono::{DateTime, Local};
 
 pub struct CommandCounter;
 
@@ -11,7 +11,7 @@ impl Key for CommandCounter {
 pub struct StartupTime;
 
 impl Key for StartupTime {
-    type Value = Tm; // TODO Change to chrono's DateTime<LocalTime>
+    type Value = DateTime<Local>; // TODO Change to chrono's DateTime<LocalTime>
 }
 
 #[derive(Debug)]

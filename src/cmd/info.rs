@@ -1,7 +1,6 @@
 use serenity::client::CACHE;
-use time::{Tm, Duration};
-use time;
 use utils::sharekvp::StartupTime;
+use chrono::{DateTime, Local, Duration};
 use psutil;
 const BYTES_TO_MEGABYTES: f64 = 1f64 / (1024f64 * 1024f64);
 // Add additional content
@@ -10,8 +9,8 @@ command!(status(_context, message) {
     let uri = ca.user.avatar_url().unwrap();
 
     let data = _context.data.lock().unwrap();
-    let uptime = data.get::<StartupTime>().unwrap();
-    let tnow: Tm = time::now();
+    let starttime = data.get::<StartupTime>().unwrap();
+    let tnow = Local::now();
 
     let processes = match psutil::process::all() {
         Ok(processes) => processes,
@@ -41,7 +40,7 @@ command!(status(_context, message) {
         |m| m.content(" ").embed(
             |e| e.author(
                 |a| a.icon_url(uri.as_str()).name(ca.user.name.as_str())
-            ).description(&format!("**Started**: {}\n**Uptime**: {}", uptime.rfc822(), duration_to_ascii(tnow - uptime.clone())))
+            ).description(&format!("**Started**: {}\n**Uptime**: {}", starttime.to_rfc2822(), duration_to_ascii(tnow.signed_duration_since(starttime.to_owned()))))
             .title("Status")
             .field(|f| f.name("Thread Count").value(&threads.to_string()))
             .field(|f| {
