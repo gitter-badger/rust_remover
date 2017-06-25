@@ -13,6 +13,7 @@ extern crate crypto;
 extern crate url;
 extern crate reqwest;
 extern crate chrono;
+extern crate psutil;
 
 // Custom "Crates -> Modules"
 mod cmd;
@@ -119,13 +120,13 @@ fn main() {
             .bucket("complicated", 5, 30, 2)
             .group("Utility", |g|
                    g.command("about", |c|
-                             c.exec_str("Small bot written using rust")
+                             c.exec_str("A small bot i have written for myself. its for fun so dont expect anything.\n\n**Author:** HeapUnderflow#9358")
                              .bucket("extended")
-                             .desc("Info about why: More under stats & info"))
+                             .desc("About the Bot"))
                    .command("commands",|c|
                             c.bucket("complicated")
                             .exec(commands)
-                            .desc("How much was an command used")
+                            .desc("How much was an command used\n**REQUIRED**: Bot Owner")
                             .required_permissions(permissions::ADMINISTRATOR)
                             .check(owner_check))
                    .command("stats", |c| c.bucket("complicated").exec(cmd::info::status).desc("Gives Status infos about the bot"))
@@ -133,15 +134,15 @@ fn main() {
                    .command("embed", |c|
                             c.exec(cmd::utilcmd::embed)
                             .check(owner_check)
-                            .desc("Create an Custom embed. OWNER ONLY"))
+                            .desc("Create an Custom embed.\n**REQUIRED**: Bot Owner"))
                    .command("purge_self", |c|
                             c.exec(cmd::utilcmd::purge_self)
                             .check(owner_check)
-                            .desc("Purges x bot messages"))
+                            .desc("Purges x bot messages\n**REQUIRED**: Bot Owner"))
                    .command("purge", |c|
                             c.exec(cmd::utilcmd::purge)
                             .check(owner_check)
-                            .desc("Purges x messages")))
+                            .desc("Purges x messages\n**REQUIRED**: Bot Owner")))
             .group("Cleverbot", |g|
                    g.command("think", |c|
                              c.bucket("extended")
@@ -150,11 +151,11 @@ fn main() {
                              .known_as("cleverbot")
                              .known_as("cb")
                              .check(owner_check)
-                             .desc("Ask Cleverbot (if the API isnt Broken)"))
+                             .desc("Ask Cleverbot (if the API isnt Broken)\n**REQUIRED**: Bot Owner"))
                    .command("cbrestart", |c|
                             c.bucket("extended")
                             .exec(cmd::cleverbot::restart)
-                            .desc("Reinitialize the Cleverbot Session")
+                            .desc("Reinitialize the Cleverbot Session\n**REQUIRED**: Bot Owner")
                             .check(owner_check)))
     );
 
@@ -211,7 +212,8 @@ command!(ping(_context, message) {
     let _ = message.reply("Pong!");
     info!("Answered {{{}}} by {}#{} ({})", &message.content[2..], message.author.name, message.author.discriminator, message.author.id);
 });
-#[allow(unused_variables)]
+
+/*#[allow(unused_variables)]
 command!(say(_context, message, _args, text: String) {
     if _args[0] == ":embed" {
         let _ = message.channel_id.send_message(
@@ -224,20 +226,20 @@ command!(say(_context, message, _args, text: String) {
             |m| m.content(_args.join(" ").as_ref())
         );
     }
-});
+});*/
 
 /*
 TODO
 
 commands:
 -> info
---> Bot info (version, name etc)
+--> Bot info (version, name etc) -- https://crates.io/crates/psutil
 
 -> stats » statistics
 --> Statistics about guilds served & member count.
 --> https://github.com/acdenisSK/kitty/blob/master/commands/stats.go
 
--> sinfo
+-> sinfo 
 --> Info about the server the bot is residing on.
 --> https://github.com/acdenisSK/kitty/blob/master/commands/sinfo.go
 

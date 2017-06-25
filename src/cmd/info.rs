@@ -1,8 +1,9 @@
 use serenity::client::CACHE;
 use time::{Tm, Duration};
 use time;
-use utils::sharekvp::{StartupTime, ReducedReadyPayload};
-
+use utils::sharekvp::StartupTime;
+use psutil;
+const BYTES_TO_MEGABYTES: f64 = 1f64 / (1024f64 * 1024f64);
 // Add additional content
 command!(status(_context, message) {
     let ca = CACHE.read().unwrap();
@@ -10,17 +11,46 @@ command!(status(_context, message) {
 
     let data = _context.data.lock().unwrap();
     let uptime = data.get::<StartupTime>().unwrap();
-    let rpayload = data.get::<ReducedReadyPayload>().unwrap();
     let tnow: Tm = time::now();
+
+    let processes = match psutil::process::all() {
+        Ok(processes) => processes,
+        Err(_) => return Err("Failed to read process list".to_owned()),
+    };
+    let process = match processes.iter().find(|p| p.pid == psutil::getpid()) {
+        Some(process) => process,
+        None => return Err("Failed to retrieve information on process".to_owned()),
+    };
+    let threads = process.num_threads;
+    let memory = match process.memory() {
+        Ok(memory) => memory,
+        Err(_) => return Err("Failed to retrieve process memory usage".to_owned()),
+    };
+
+    let total_mem;
+    let resident_mem;
+    let shared_mem;
+    #[cfg_attr(feature = "clippy", allow(cast_precision_loss))]
+    {
+        total_mem = memory.size as f64 * BYTES_TO_MEGABYTES;
+        resident_mem = memory.resident as f64 * BYTES_TO_MEGABYTES;
+        shared_mem = memory.share as f64 * BYTES_TO_MEGABYTES;
+    }
 
     if let Err(why) = message.channel_id.send_message(
         |m| m.content(" ").embed(
             |e| e.author(
                 |a| a.icon_url(uri.as_str()).name(ca.user.name.as_str())
-            ).description(
-                format!("**Started**: {}\n**Uptime**: {}\n**RRP**: ```{:?}```", uptime.rfc822(), duration_to_ascii(tnow - uptime.clone()), rpayload).as_ref()
-            )
-             .title("Status")
+            ).description(&format!("**Started**: {}\n**Uptime**: {}", uptime.rfc822(), duration_to_ascii(tnow - uptime.clone())))
+            .title("Status")
+            .field(|f| f.name("Thread Count").value(&threads.to_string()))
+            .field(|f| {
+                f.name("Memory Usage")
+                    .value(&format!("**Total**: {:.2} MB\n**Resident**: {:.2} MB\n**Shared**: {:.2} MB",
+                                        round(total_mem, 2),
+                                        round(resident_mem, 2),
+                                        round(shared_mem, 2)))
+                })
         )
     ) {
         warn!("Sending status failed because: {:?}", why);
@@ -38,5 +68,18 @@ fn duration_to_ascii(d: Duration) -> String {
     let minutes = delta.num_minutes();
     delta = delta - Duration::minutes(minutes);
     let seconds = delta.num_seconds();
-    String::from(format!("{} Weeks, {} Days, {} Hours, {} Minutes, {} Seconds", weeks, days, hours, minutes, seconds))
+    String::from(format!(
+        "{} Weeks, {} Days, {} Hours, {} Minutes, {} Seconds",
+        weeks,
+        days,
+        hours,
+        minutes,
+        seconds
+    ))
+}
+
+#[inline]
+fn round(num: f64, precision: i32) -> f64 {
+    let power = 10f64.powi(precision);
+    (num * power).round() / power
 }
