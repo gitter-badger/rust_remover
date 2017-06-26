@@ -25,6 +25,7 @@ use serenity::ext::framework::{DispatchError, help_commands};
 use serenity::client::Context;
 use serenity::Client;
 use serenity::model::{Message, permissions};
+use serenity::ext::framework::Framework;
 use std::env;
 use std::collections::HashMap;
 use std::fmt::Write;
@@ -58,111 +59,7 @@ fn main() {
     }
     // Contruct avalible commands
     debug!("Contructing framework...");
-    client.with_framework(
-        |f| f
-	      // Configures the client, allowing for options to mutate how the
-	      // framework functions.
-	      //
-	      // Refer to the documentation for
-	      // `serenity::ext::framework::Configuration` for all available
-	      // configurations.
-	          .configure(|c| c
-	                     .allow_whitespace(false)
-	                     .on_mention(true)
-	                     .prefix(CLIENT_PREFIX))
-	      // Set a function to be called prior to each command execution. This
-	      // provides the context of the command, the message that was received,
-	      // and the full name of the command that will be called.
-	      //
-	      // You can not use this to determine whether a command should be
-	      // executed. Instead, `set_check` is provided to give you this
-	      // functionality.
-	          .before(|ctx, msg, command_name| {
-                {
-	                  info!("Got command '{}' by user 'U_{}' in 'C_{} @ G_{}'",
-	                        command_name,
-	                        msg.author.id,
-                          msg.channel_id,
-                          msg.guild_id().unwrap()
-                    );
-                }
-
-	              // Increment the number of times this command has been run once. If
-	              // the command's name does not exist in the counter, add a default
-	              // value of 0.
-	              let mut data = ctx.data.lock().unwrap();
-	              let counter = data.get_mut::<CommandCounter>().unwrap();
-	              let entry = counter.entry(command_name.clone()).or_insert(0);
-	              *entry += 1;
-
-	              true // if `before` returns false, command processing doesn't happen.
-	          })
-	      // Similar to `before`, except will be called directly _after_
-	      // command execution.
-	          .after(|_, _, command_name, error| {
-	              match error {
-	                  Ok(()) => debug!("Processed command '{}'", command_name),
-	                  Err(why) => info!("Command '{}' returned error {:?}", command_name, why),
-	              }
-	          })
-	      // Set a function that's called whenever a command's execution didn't complete for one
-	      // reason or another. For example, when a user has exceeded a rate-limit or a command
-	      // can only be performed by the bot owner.
-	          .on_dispatch_error(|_ctx, msg, error| {
-	              match error {
-	                  DispatchError::RateLimited(seconds) => {
-	                      let _ = msg.channel_id.say(&format!("Try this again in {} seconds.", seconds));
-	                  },
-                      DispatchError::LackOfPermissions(permissions) => {
-                          warn!("Lacking Permissions ({:?}) for '{}' in '{}'", permissions, msg.content, msg.channel_id);
-                      }
-	                  // Any other error would be silently ignored.
-	                  _ => {},
-		  	        }
-		        })
-            .simple_bucket("short", 2)
-            .simple_bucket("extended", 5)
-            .bucket("complicated", 5, 30, 2)
-            .group("Utility", |g|
-                   g.command("about", |c|
-                             c.exec_str("A small bot i have written for myself. its for fun so dont expect anything.\n\n**Author:** HeapUnderflow#9358")
-                             .bucket("extended")
-                             .desc("About the Bot"))
-                   .command("commands",|c|
-                            c.bucket("complicated")
-                            .exec(commands)
-                            .desc("How much was an command used\n**REQUIRED**: Bot Owner")
-                            .required_permissions(permissions::ADMINISTRATOR)
-                            .check(owner_check))
-                   .command("stats", |c| c.bucket("complicated").exec(cmd::info::status).desc("Gives Status infos about the bot"))
-                   .command("help", |c| c.exec_help(help_commands::with_embeds).bucket("short"))
-                   .command("embed", |c|
-                            c.exec(cmd::utilcmd::embed)
-                            .check(owner_check)
-                            .desc("Create an Custom embed.\n**REQUIRED**: Bot Owner"))
-                   .command("purge_self", |c|
-                            c.exec(cmd::utilcmd::purge_self)
-                            .check(owner_check)
-                            .desc("Purges x bot messages\n**REQUIRED**: Bot Owner"))
-                   .command("purge", |c|
-                            c.exec(cmd::utilcmd::purge)
-                            .check(owner_check)
-                            .desc("Purges x messages\n**REQUIRED**: Bot Owner")))
-            .group("Cleverbot", |g|
-                   g.command("think", |c|
-                             c.bucket("extended")
-                             .exec(cmd::cleverbot::think)
-                             .known_as("ask")
-                             .known_as("cleverbot")
-                             .known_as("cb")
-                             .check(owner_check)
-                             .desc("Ask Cleverbot (if the API isnt Broken)\n**REQUIRED**: Bot Owner"))
-                   .command("cbrestart", |c|
-                            c.bucket("extended")
-                            .exec(cmd::cleverbot::restart)
-                            .desc("Reinitialize the Cleverbot Session\n**REQUIRED**: Bot Owner")
-                            .check(owner_check)))
-    );
+    client.with_framework(build_framework);
 
     // Startup
     debug!("Creating callbacks...");
@@ -189,6 +86,92 @@ fn main() {
     println!("Exited...\nCode Recieved:\n{:?}", v);
 
 }
+
+fn build_framework(f: Framework) -> Framework {
+    
+    let mut f = f.configure(|c| c.allow_whitespace(false).on_mention(true).prefix(CLIENT_PREFIX));
+    f = f.before(|ctx, msg, command_name| {
+        {
+            info!("Got command '{}' by user 'U_{}' in 'C_{} @ G_{}'",
+                command_name,
+                msg.author.id,
+                msg.channel_id,
+                msg.guild_id().unwrap()
+            );
+        }
+        let mut data = ctx.data.lock().unwrap();
+        let counter = data.get_mut::<CommandCounter>().unwrap();
+        let entry = counter.entry(command_name.clone()).or_insert(0);
+        *entry += 1;
+
+        true // if `before` returns false, command processing doesn't happen.
+    });
+
+	f = f.after(|_, _, command_name, error| {
+        match error {
+            Ok(()) => debug!("Processed command '{}'", command_name),
+            Err(why) => info!("Command '{}' returned error {:?}", command_name, why),
+        }
+    });
+    f = f.on_dispatch_error(|_ctx, msg, error| {
+        match error {
+            DispatchError::RateLimited(seconds) => {
+                let _ = msg.channel_id.say(&format!("Try this again in {} seconds.", seconds));
+            },
+            DispatchError::LackOfPermissions(permissions) => {
+                warn!("Lacking Permissions ({:?}) for '{}' in '{}'", permissions, msg.content, msg.channel_id);
+            },
+            _ => {},
+        }
+    });
+    // Buckets
+    f = f.simple_bucket("short", 2).simple_bucket("extended", 5).bucket("complicated", 5, 30, 2);
+
+    // Utility Commands
+    f = f.group("Utility", |g| g
+        .command("about", |c| c
+            .exec_str("A small bot i have written for myself. its for fun so dont expect anything.\n\n**Author:** HeapUnderflow#9358")
+            .bucket("extended")
+            .desc("About the Bot"))
+        .command("commands",|c| c
+            .bucket("complicated")
+            .exec(commands)
+            .desc("How much was an command used\n**REQUIRED**: Bot Owner")
+            .required_permissions(permissions::ADMINISTRATOR)
+            .check(owner_check))
+        .command("stats", |c| c.bucket("complicated").exec(cmd::info::status).desc("Gives Status infos about the bot"))
+            .command("help", |c| c.exec_help(help_commands::with_embeds).bucket("short"))
+            .command("embed", |c| c
+                .exec(cmd::utilcmd::embed)
+                    .check(owner_check)
+                    .desc("Create an Custom embed.\n**REQUIRED**: Bot Owner"))
+                .command("purge_self", |c| c
+                    .exec(cmd::utilcmd::purge_self)
+                    .check(owner_check)
+                    .desc("Purges x bot messages\n**REQUIRED**: Bot Owner"))
+                .command("purge", |c| c
+                    .exec(cmd::utilcmd::purge)
+                    .check(owner_check)
+                    .desc("Purges x messages\n**REQUIRED**: Bot Owner")));
+    
+    // Cleverbot Commands
+    f = f.group("Cleverbot", |g| g
+            .command("think", |c| c
+                .bucket("extended")
+                .exec(cmd::cleverbot::think)
+                .known_as("ask")
+                .known_as("cleverbot")
+                .known_as("cb")
+                .check(owner_check)
+                .desc("Ask Cleverbot (if the API isnt Broken)\n**REQUIRED**: Bot Owner"))
+            .command("cbrestart", |c| c
+                .bucket("extended")
+                .exec(cmd::cleverbot::restart)
+                .desc("Reinitialize the Cleverbot Session\n**REQUIRED**: Bot Owner")
+                .check(owner_check)));
+        f
+}
+
 
 #[allow(dead_code)]
 fn owner_check(_: &mut Context, message: &Message) -> bool {
