@@ -2,10 +2,9 @@ use utils::linear_parse::JsonToDiscordEmbedObject;
 use serenity::client::CACHE;
 use serenity::model::{Message, MessageId, UserId};
 use serenity::client::Context;
-use serenity::model::permissions::MANAGE_MESSAGES;
-use chrono::{DateTime, Local, Duration};
-use chrono::offset::LocalResult;
+use chrono::Local;
 
+#[allow(unused_variables)]
 command!(embed(_ctx, msg, _args, text: String) {
     let s: String = _args.join(" ");
     let jsprs = JsonToDiscordEmbedObject::new();
@@ -22,7 +21,7 @@ command!(purge_self(_ctx, msg, _args, amount: u64) {
         _ => 0
     };
     let userid = CACHE.read().unwrap().user.id;
-    purge_messages(_ctx, msg, amount, Some(userid));
+    purge_messages(_ctx, msg, count, Some(userid));
 });
 
 command!(purge(_ctx, msg, _args, amount: u64) {
@@ -30,8 +29,9 @@ command!(purge(_ctx, msg, _args, amount: u64) {
         1...100 => amount,
         _ => 0
     };
-    purge_messages(_ctx, msg, amount, None);
+    purge_messages(_ctx, msg, count, None);
 });
+
 fn purge_messages(_ctx: &mut Context, msg: &Message, amount: u64, user: Option<UserId>) {
      match msg.channel_id.messages(|g| g.limit(100)) {
         Ok(x) => {
@@ -41,7 +41,7 @@ fn purge_messages(_ctx: &mut Context, msg: &Message, amount: u64, user: Option<U
                         return false;
                     }
                 }
-                let mut ptime = p.timestamp.clone();
+                let ptime = p.timestamp.clone();
                 let ctime = Local::now();
                 let delta = ctime.signed_duration_since(ptime);
                 if delta.num_days() > 11 {

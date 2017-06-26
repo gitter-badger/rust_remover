@@ -1,3 +1,5 @@
+#![deny(deprecated)]
+
 // Macro Uses
 #[macro_use] extern crate serenity;
 #[macro_use] extern crate log;
@@ -27,8 +29,7 @@ use std::env;
 use std::collections::HashMap;
 use std::fmt::Write;
 use utils::sharekvp::{CommandCounter, StartupTime, ReducedReadyPayload};
-use chrono::prelude::{DateTime, Local};
-use chrono::offset::LocalResult;
+use chrono::prelude::Local;
 
 const CLIENT_PREFIX: &'static str = "x?";
 
@@ -41,7 +42,7 @@ fn main() {
         Ok(file) => file,
         Err(_) => String::from("log4rs.yml")
     };
-    let mut client = Client::login(&env::var("DISCORD_TOKEN").expect("token"));
+    let mut client = Client::new(&env::var("DISCORD_TOKEN").expect("token"));
     // Init Logger
     log4rs::init_file(logfile, Default::default()).unwrap();
 

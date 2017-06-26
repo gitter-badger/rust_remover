@@ -1,11 +1,10 @@
 use serenity::client::CACHE;
 use utils::sharekvp::StartupTime;
-use chrono::{DateTime, Local, Duration};
-use serenity::model::{Guild, GuildChannel, UserId};
-use std::sync::{RwLock, RwLockReadGuard};
+use chrono::{Local, Duration};
+//use serenity::model::{Guild, GuildChannel, UserId};
 use psutil;
 use std::vec::Vec;
-use std::ops::Deref;
+//use std::ops::Deref;
 
 
 const BYTES_TO_MEGABYTES: f64 = 1f64 / (1024f64 * 1024f64);
@@ -28,6 +27,7 @@ command!(status(_context, message) {
     let tnow = Local::now();
 
     // Guild Info
+
     
     // Memory Statistics
     let processes = match psutil::process::all() {
@@ -47,7 +47,6 @@ command!(status(_context, message) {
     let total_mem;
     let resident_mem;
     let shared_mem;
-    #[allow(cast_precision_loss)]
     {
         total_mem = memory.size as f64 * BYTES_TO_MEGABYTES;
         resident_mem = memory.resident as f64 * BYTES_TO_MEGABYTES;

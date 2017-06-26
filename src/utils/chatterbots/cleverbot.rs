@@ -1,3 +1,4 @@
+#[allow(dead_code)]
 static API_BASE_URL: &'static str = "https://www.cleverbot.com/getreply";
 
 use utils;
@@ -13,7 +14,7 @@ pub struct Cleverbot {
     api_key: String,
     sesscs: String
 }
-
+#[allow(dead_code)]
 impl Cleverbot {
     pub fn new(api_key: String) -> Cleverbot {
         Cleverbot {
