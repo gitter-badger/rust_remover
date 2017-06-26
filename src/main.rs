@@ -29,7 +29,7 @@ use serenity::ext::framework::Framework;
 use std::env;
 use std::collections::HashMap;
 use std::fmt::Write;
-use utils::sharekvp::{CommandCounter, StartupTime, ReducedReadyPayload, CleverbotToken};
+use utils::sharekvp::{CommandCounter, StartupTime, CleverbotToken};
 use chrono::prelude::Local;
 
 const CLIENT_PREFIX: &'static str = "x?";
@@ -50,7 +50,7 @@ fn main() {
 
     info!("Booting bot...");
 
-    debug!("Initializing command counter (what ever it is...)!");
+    debug!("Initializing command counter !");
     {
         let mut data = client.data.lock().unwrap();
         data.insert::<CommandCounter>(HashMap::default());
@@ -65,18 +65,11 @@ fn main() {
     debug!("Creating callbacks...");
     // Create on_ready callback & game setting
     client.on_ready(|_context, ready| {
-        //println!("{} is connected", ready.user.name);
-        info!("Bot booted & connected as {}", ready.user.name);
         _context.set_game(Game::playing("x? | Removing Rust"));
-
-        // Setting Data
-        {
-            let mut data = _context.data.lock().unwrap();
-            data.insert::<ReducedReadyPayload>(ReducedReadyPayload {
-                session_id: ready.session_id,
-                shard: ready.shard,
-                version: ready.version
-            });
+        if let Some(shards) = ready.shard {
+            info!("Started as {}#{} on Shard {}/{} with {} Guilds. [SERENITY VERSION: {}]", ready.user.name, ready.user.discriminator, shards[0], shards[1], ready.guilds.len(), ready.version);
+        } else {
+            info!("Started as {}#{} on Shard NaN/NaN with {} Guilds. [SERENITY VERSION: {}]", ready.user.name, ready.user.discriminator, ready.guilds.len(), ready.version);
         }
     });
     info!("Attempting to start Shards....");

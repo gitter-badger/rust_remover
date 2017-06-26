@@ -20,7 +20,7 @@ command!(restart(_ctx, message, _args) {
 });
 
 #[allow(dead_code)]
-fn new_cb_session(_ctx: &mut Context) -> Result<Cleverbot, String> {
+fn new_cb_session(_ctx: &mut  Context) -> Result<Cleverbot, String> {
     let data = _ctx.data.lock().unwrap();
     let token = data.get::<CleverbotToken>().unwrap().clone();
     Ok(Cleverbot::new(token))

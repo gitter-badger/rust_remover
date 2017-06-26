@@ -19,16 +19,3 @@ pub struct CleverbotToken;
 impl Key for CleverbotToken {
     type Value = String;
 }
-
-
-
-#[derive(Debug)]
-pub struct ReducedReadyPayload {
-    pub session_id: String,
-    pub shard: Option<[u64; 2]>,
-    pub version: u64
-}
-
-impl Key for ReducedReadyPayload {
-    type Value = ReducedReadyPayload;
-}
