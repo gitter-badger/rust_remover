@@ -58,16 +58,17 @@ command!(status(_context, message) {
         |m| m.content(" ").embed(
             |e| e.author(
                 |a| a.icon_url(uri.as_str()).name(ca.user.name.as_str())
-            ).description(&format!("**Started**: {}\n**Uptime**: {}", starttime.to_rfc2822(), duration_to_ascii(tnow.signed_duration_since(starttime.to_owned()))))
+            )
+            .description(&format!("**Started**: {}\n**Uptime**: {}", starttime.to_rfc2822(), duration_to_ascii(tnow.signed_duration_since(starttime.to_owned()))))
             .title("Status")
             .field(|f| {
                 f.name("Memory Usage")
                     .value(
                         &format!("**Thread Count**: {}\n**Total**: {:.2} MB\n**Resident**: {:.2} MB\n**Shared**: {:.2} MB",
                             threads.to_string(),
-                            round(total_mem, 2),
-                            round(resident_mem, 2),
-                            round(shared_mem, 2)
+                            round_with_precision(total_mem, 2),
+                            round_with_precision(resident_mem, 2),
+                            round_with_precision(shared_mem, 2)
                         )
                     )
                 }
@@ -100,7 +101,7 @@ fn duration_to_ascii(d: Duration) -> String {
 }
 
 #[inline]
-fn round(num: f64, precision: i32) -> f64 {
+fn round_with_precision(num: f64, precision: i32) -> f64 {
     let power = 10f64.powi(precision);
     (num * power).round() / power
 }
