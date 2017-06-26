@@ -19,6 +19,7 @@ extern crate psutil;
 // Custom "Crates -> Modules"
 mod cmd;
 mod utils;
+mod statics;
 
 use serenity::model::Game;
 use serenity::ext::framework::{DispatchError, help_commands};
@@ -133,19 +134,19 @@ fn build_framework(f: Framework) -> Framework {
             .required_permissions(permissions::ADMINISTRATOR)
             .check(owner_check))
         .command("stats", |c| c.bucket("complicated").exec(cmd::info::status).desc("Gives Status infos about the bot"))
-            .command("help", |c| c.exec_help(help_commands::with_embeds).bucket("short"))
-            .command("embed", |c| c
-                .exec(cmd::utilcmd::embed)
-                    .check(owner_check)
-                    .desc("Create an Custom embed.\n**REQUIRED**: Bot Owner"))
-                .command("purge_self", |c| c
-                    .exec(cmd::utilcmd::purge_self)
-                    .check(owner_check)
-                    .desc("Purges x bot messages\n**REQUIRED**: Bot Owner"))
-                .command("purge", |c| c
-                    .exec(cmd::utilcmd::purge)
-                    .check(owner_check)
-                    .desc("Purges x messages\n**REQUIRED**: Bot Owner")));
+        .command("help", |c| c.exec_help(help_commands::with_embeds).bucket("short"))
+        .command("embed", |c| c
+            .exec(cmd::utilcmd::embed)
+            .check(owner_check)
+            .desc("Create an Custom embed.\n**REQUIRED**: Bot Owner"))
+        .command("purge_self", |c| c
+            .exec(cmd::utilcmd::purge_self)
+            .check(owner_check)
+            .desc("Purges x bot messages\n**REQUIRED**: Bot Owner"))
+        .command("purge", |c| c
+            .exec(cmd::utilcmd::purge)
+            .check(owner_check)
+            .desc("Purges x messages\n**REQUIRED**: Bot Owner")));
     
     // Cleverbot Commands
     f = f.group("Cleverbot", |g| g

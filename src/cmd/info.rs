@@ -3,6 +3,7 @@ use utils::sharekvp::StartupTime;
 use chrono::{Local, Duration};
 //use serenity::model::{Guild, GuildChannel, UserId};
 use psutil;
+use statics;
 use std::vec::Vec;
 //use std::ops::Deref;
 
@@ -56,6 +57,7 @@ command!(status(_context, message) {
         shared_mem = memory.share as f64 * BYTES_TO_MEGABYTES;
     }
 
+    let stcs = statics::Statics::get();
 
     if let Err(why) = message.channel_id.send_message(
         |m| m.content(" ").embed(
@@ -72,7 +74,11 @@ command!(status(_context, message) {
                             round_with_precision(total_mem, 2),
                             round_with_precision(resident_mem, 2),
                             round_with_precision(shared_mem, 2))))
-            .field(|f| f.name("Guild Statistics").value(&format!("Serving:*{}* Guilds\n*{}* Channels\n*{}* Unique Users", guild_count, channel_count, user_count)))
+            .field(|f| f.name("Guild Statistics").value(&format!("*{}* Guilds\n*{}* Channels\n*{}* Unique Users", guild_count, channel_count, user_count)))
+            .field(|f| f
+                .name("Infos")
+                .value(&format!("**Target**: {}\n**Authors**: {}\n**Project Name**: {}\n**Version**: {}", 
+                        stcs.TARGET, stcs.CARGO_PKG_AUTHORS, stcs.CARGO_PKG_NAME, stcs.CARGO_PKG_VERSION)))
         )
     ) { // Actual if block begins here
         warn!("Sending status failed because: {:?}", why);
