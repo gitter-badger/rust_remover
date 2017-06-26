@@ -28,7 +28,7 @@ use serenity::model::{Message, permissions};
 use std::env;
 use std::collections::HashMap;
 use std::fmt::Write;
-use utils::sharekvp::{CommandCounter, StartupTime, ReducedReadyPayload};
+use utils::sharekvp::{CommandCounter, StartupTime, ReducedReadyPayload, CleverbotToken};
 use chrono::prelude::Local;
 
 const CLIENT_PREFIX: &'static str = "x?";
@@ -42,7 +42,8 @@ fn main() {
         Ok(file) => file,
         Err(_) => String::from("log4rs.yml")
     };
-    let mut client = Client::new(&env::var("DISCORD_TOKEN").expect("token"));
+    let mut client = Client::new(&env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN"));
+    let cleverbot_token = env::var("CLEVERBOT_TOKEN").expect("CLEVERBOT_TOKEN");
     // Init Logger
     log4rs::init_file(logfile, Default::default()).unwrap();
 
@@ -53,6 +54,7 @@ fn main() {
         let mut data = client.data.lock().unwrap();
         data.insert::<CommandCounter>(HashMap::default());
         data.insert::<StartupTime>(Local::now());
+        data.insert::<CleverbotToken>(String::from(cleverbot_token));
     }
     // Contruct avalible commands
     debug!("Contructing framework...");
@@ -111,6 +113,9 @@ fn main() {
 	                  DispatchError::RateLimited(seconds) => {
 	                      let _ = msg.channel_id.say(&format!("Try this again in {} seconds.", seconds));
 	                  },
+                      DispatchError::LackOfPermissions(permissions) => {
+                          warn!("Lacking Permissions ({:?}) for '{}' in '{}'", permissions, msg.content, msg.channel_id);
+                      }
 	                  // Any other error would be silently ignored.
 	                  _ => {},
 		  	        }

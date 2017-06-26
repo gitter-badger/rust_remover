@@ -1,5 +1,6 @@
 use serenity::client::Context;
 use utils::chatterbots::cleverbot::Cleverbot;
+use utils::sharekvp::CleverbotToken;
 
 #[allow(dead_code)]
 command!(think(_ctx, message, _args, _text: String) {
@@ -8,7 +9,7 @@ command!(think(_ctx, message, _args, _text: String) {
 
 #[allow(dead_code)]
 command!(restart(_ctx, message, _args) {
-    match new_cb_session(&_ctx) {
+    match new_cb_session(_ctx) {
         Ok(_cbs) => {
             let _ = message.reply("\u{1f44c}");
             ()
@@ -19,6 +20,8 @@ command!(restart(_ctx, message, _args) {
 });
 
 #[allow(dead_code)]
-fn new_cb_session<'cntxt> (_ctx: &'cntxt Context) -> Result<Cleverbot, String> {
-    Ok(Cleverbot::new("This Token".to_owned()))
+fn new_cb_session(_ctx: &mut Context) -> Result<Cleverbot, String> {
+    let data = _ctx.data.lock().unwrap();
+    let token = data.get::<CleverbotToken>().unwrap().clone();
+    Ok(Cleverbot::new(token))
 }

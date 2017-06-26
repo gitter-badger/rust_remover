@@ -11,8 +11,16 @@ impl Key for CommandCounter {
 pub struct StartupTime;
 
 impl Key for StartupTime {
-    type Value = DateTime<Local>; // TODO Change to chrono's DateTime<LocalTime>
+    type Value = DateTime<Local>;
 }
+
+pub struct CleverbotToken;
+
+impl Key for CleverbotToken {
+    type Value = String;
+}
+
+
 
 #[derive(Debug)]
 pub struct ReducedReadyPayload {

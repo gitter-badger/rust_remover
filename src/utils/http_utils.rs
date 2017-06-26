@@ -1,4 +1,3 @@
-use std::vec::Vec;
 use std::collections::HashMap;
 use url::form_urlencoded;
 
@@ -9,7 +8,7 @@ use std::io::Write;
 
 /// Returns the string at the index of the vec, or None if the index is invalid
 #[allow(dead_code)]
-pub fn string_at_index<'a>(strings: &'a Vec<String>, index: usize) -> Option<String> {
+pub fn string_at_index(strings: &[String], index: usize) -> Option<String> {
     if index >= strings.len() {
         return None;
     }
@@ -53,7 +52,7 @@ pub fn write_flush_stdout<S>(inp: S) where S: Into<String> {
 
 #[allow(dead_code)]
 pub fn flush_stdout() {
-    io::stdout().flush().ok().expect("Could not flush stdout");
+    io::stdout().flush().expect("Could not flush stdout");
 }
 
 #[allow(dead_code)]

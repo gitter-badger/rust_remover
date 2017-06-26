@@ -22,11 +22,14 @@ command!(status(_context, message) {
     let starttime;
     {
         let data = _context.data.lock().unwrap();
-        starttime = data.get::<StartupTime>().unwrap().clone();
+        starttime = *data.get::<StartupTime>().unwrap();
     }
     let tnow = Local::now();
 
     // Guild Info
+    let guild_count: u64 = 0;
+    let channel_count: u64 = 0;
+    let user_count: u64 = 0;
 
     
     // Memory Statistics
@@ -61,20 +64,17 @@ command!(status(_context, message) {
             )
             .description(&format!("**Started**: {}\n**Uptime**: {}", starttime.to_rfc2822(), duration_to_ascii(tnow.signed_duration_since(starttime.to_owned()))))
             .title("Status")
-            .field(|f| {
+            .field(|f|
                 f.name("Memory Usage")
                     .value(
                         &format!("**Thread Count**: {}\n**Total**: {:.2} MB\n**Resident**: {:.2} MB\n**Shared**: {:.2} MB",
                             threads.to_string(),
                             round_with_precision(total_mem, 2),
                             round_with_precision(resident_mem, 2),
-                            round_with_precision(shared_mem, 2)
-                        )
-                    )
-                }
-            )
+                            round_with_precision(shared_mem, 2))))
+            .field(|f| f.name("Guild Statistics").value(&format!("Serving:*{}* Guilds\n*{}* Channels\n*{}* Unique Users", guild_count, channel_count, user_count)))
         )
-    ) {
+    ) { // Actual if block begins here
         warn!("Sending status failed because: {:?}", why);
     }
 });
