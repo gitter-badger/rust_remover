@@ -4,8 +4,7 @@ use serenity::model::{Message, MessageId, UserId};
 use serenity::client::Context;
 use chrono::Local;
 
-#[allow(unused_variables)]
-command!(embed(_ctx, msg, _args, text: String) {
+command!(embed(_ctx, msg, _args, _text: String) {
     let s: String = _args.join(" ");
     let jsprs = JsonToDiscordEmbedObject::new();
     let _ = match jsprs.parse(s.as_str()) {

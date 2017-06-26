@@ -90,7 +90,7 @@ fn duration_to_ascii(d: Duration) -> String {
     delta = delta - Duration::minutes(minutes);
     let seconds = delta.num_seconds();
     String::from(format!(
-        "{}w {}d, {}h, {}m, {}s",
+        "{}w {}d {}h {}m {}s",
         weeks,
         days,
         hours,
