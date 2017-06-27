@@ -14,7 +14,7 @@ extern crate crypto;
 extern crate url;
 extern crate reqwest;
 extern crate chrono;
-#[cfg(feature="psutil")]
+#[cfg(feature="memory-stats")]
 extern crate psutil;
 extern crate rand;
 

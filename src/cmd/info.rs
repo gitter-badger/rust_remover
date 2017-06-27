@@ -2,7 +2,7 @@ use serenity::client::CACHE;
 use utils::sharekvp::StartupTime;
 use chrono::{Local, Duration};
 use serenity::model::UserId;
-#[cfg(feature="psutil")]
+#[cfg(feature="memory-stats")]
 use psutil;
 use statics;
 use std::vec::Vec;
@@ -61,7 +61,7 @@ command!(status(_context, message) {
     let mut shared_mem: f64 = -1.0;
     let mut num_threads: String = "-1".to_owned();
     // Memory Statistics
-    #[cfg(feature="psutil")]
+    #[cfg(feature="memory-stats")]
     {
         let processes = match psutil::process::all() {
             Ok(processes) => processes,
