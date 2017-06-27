@@ -1,12 +1,11 @@
 use serenity::client::CACHE;
 use utils::sharekvp::StartupTime;
 use chrono::{Local, Duration};
-use serenity::model::{Guild, ChannelId, UserId};
+use serenity::model::UserId;
 use psutil;
 use statics;
 use std::vec::Vec;
 use std::collections::HashMap;
-use std::ops::Deref;
 use utils::misc::random_color;
 
 const BYTES_TO_MEGABYTES: f64 = 1f64 / (1024f64 * 1024f64);
@@ -32,8 +31,8 @@ command!(status(_context, message) {
     let mut guild_count: usize = 0;
     let mut channel_count: usize = 0;
     let mut user_count: usize = 0;
-    let mut user_duplicate_count: usize = 0;
-    let mut user_uniqe_count: usize = 0;
+    let mut user_duplicate_count: usize;
+    let mut user_unique_count: usize;
 
     {
         let mut user_ids: HashMap<UserId, u32> = HashMap::new();
@@ -50,8 +49,8 @@ command!(status(_context, message) {
         for (_, count) in &user_ids {
             user_count += *count as usize;
         }
-        user_uniqe_count = user_ids.len();
-        user_duplicate_count = user_count - user_uniqe_count;
+        user_unique_count = user_ids.len();
+        user_duplicate_count = user_count - user_unique_count;
     }
     
     // Memory Statistics
@@ -96,11 +95,11 @@ command!(status(_context, message) {
                             round_with_precision(total_mem, 2),
                             round_with_precision(resident_mem, 2),
                             round_with_precision(shared_mem, 2))))
-            .field(|f| f.name("Guild Statistics").value(&format!("*{}* Guilds\n*{}* Channels\n*{}* Users\n-> *{}* Unique\n-> *{}* Duplicates", guild_count, channel_count, user_count, user_uniqe_count, user_duplicate_count)))
+            .field(|f| f.name("Guild Statistics").value(&format!("*{}* Guilds\n*{}* Channels\n*{}* Users\n-> *{}* Unique\n-> *{}* Duplicates", guild_count, channel_count, user_count, user_unique_count, user_duplicate_count)))
             .field(|f| f
                 .name("Infos")
                 .value(&format!("**Target**: {}\n**Authors**: {}\n**Project Name**: {}\n**Version**: {}", 
-                        stcs.TARGET, stcs.CARGO_PKG_AUTHORS, stcs.CARGO_PKG_NAME, stcs.CARGO_PKG_VERSION)))
+                        stcs.target, stcs.cargp_pkg_authors, stcs.cargo_pkg_name, stcs.cargo_pkg_version)))
         )
     ) { // Actual if block begins here
         warn!("Sending status failed because: {:?}", why);
