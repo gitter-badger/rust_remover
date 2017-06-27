@@ -8,6 +8,7 @@ use statics;
 use std::vec::Vec;
 use std::collections::HashMap;
 use utils::misc::random_color;
+use serenity::utils::builder::CreateEmbedField;
 
 #[allow(dead_code)]
 const BYTES_TO_MEGABYTES: f64 = 1f64 / (1024f64 * 1024f64);
@@ -92,6 +93,21 @@ command!(status(_context, message) {
     let time_diff_guilds = guild_and_user_count_time.signed_duration_since(init_and_cache_lock_time);
     let time_diff_memory = memory_and_procress_time.signed_duration_since(guild_and_user_count_time);
 
+    let mut memusagefield = CreateEmbedField::default();
+    // Used if PSUtils is not present
+    #[cfg(feature = "memory-stats")]
+    {
+        memusagefield = memusagefield.name("Memory Usage").value(&format!("**Thread Count**: {}\n**Total**: {:.2} MB\n**Resident**: {:.2} MB\n**Shared**: {:.2} MB",
+                            num_threads,
+                            round_with_precision(total_mem, 2),
+                            round_with_precision(resident_mem, 2),
+                            round_with_precision(shared_mem, 2))
+        );
+    }
+
+    // Used if PSUtils is not present
+    #[cfg(not(feature = "memory-stats"))]
+    { memusagefield = memusagefield.name("Memory Usage").value("Memory Usage module unavalible on this platform"); }
     if let Err(why) = message.channel_id.send_message(
         |m| m.content(" ").embed(
             |e| e.author(
@@ -100,14 +116,7 @@ command!(status(_context, message) {
             .description(&format!("**Started**: {}\n**Uptime**: {}", starttime.to_rfc2822(), duration_to_ascii(tnow.signed_duration_since(starttime.to_owned()))))
             .title("Status")
             .colour(random_color())
-            .field(|f|
-                f.name("Memory Usage")
-                    .value(
-                        &format!("**Thread Count**: {}\n**Total**: {:.2} MB\n**Resident**: {:.2} MB\n**Shared**: {:.2} MB",
-                            num_threads,
-                            round_with_precision(total_mem, 2),
-                            round_with_precision(resident_mem, 2),
-                            round_with_precision(shared_mem, 2))))
+            .field(|_| memusagefield)
             .field(|f| f.name("Guild Statistics").value(&format!("*{}* Guilds\n*{}* Channels\n*{}* Users\n-> *{}* Unique\n-> *{}* Duplicates", guild_count, channel_count, user_count, user_unique_count, user_duplicate_count)))
             .field(|f| f
                 .name("Infos")
