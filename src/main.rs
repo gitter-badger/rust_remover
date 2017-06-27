@@ -15,6 +15,7 @@ extern crate url;
 extern crate reqwest;
 extern crate chrono;
 extern crate psutil;
+extern crate rand;
 
 // Custom "Crates -> Modules"
 mod cmd;
