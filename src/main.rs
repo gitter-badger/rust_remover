@@ -165,7 +165,15 @@ fn build_framework(f: Framework) -> Framework {
                 .exec(cmd::cleverbot::restart)
                 .desc("Reinitialize the Cleverbot Session\n**REQUIRED**: Bot Owner")
                 .check(owner_check)));
-        f
+    
+    // Misc Commands
+    f = f.group("Misc", |g| g
+            .command("twitch", |c| c
+                .bucket("simple")
+                .exec_str("Twitch is probably broken again.\nBut should it work, theres an account you could check out: https://twitch.tv/the__cj")
+                .desc("About Twitch")));
+
+    f
 }
 
 
