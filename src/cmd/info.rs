@@ -50,7 +50,7 @@ command!(status(_context, message) {
             user_count += *count as usize;
         }
         user_unique_count = user_ids.len();
-        user_duplicate_count = user_count - user_unique_count;
+        user_duplicate_count = user_count - user_unique_count - guild_count + 1;
     }
     
     // Memory Statistics
