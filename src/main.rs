@@ -14,6 +14,7 @@ extern crate crypto;
 extern crate url;
 extern crate reqwest;
 extern crate chrono;
+#[cfg(feature="psutil")]
 extern crate psutil;
 extern crate rand;
 

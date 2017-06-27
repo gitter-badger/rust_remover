@@ -2,12 +2,14 @@ use serenity::client::CACHE;
 use utils::sharekvp::StartupTime;
 use chrono::{Local, Duration};
 use serenity::model::UserId;
+#[cfg(feature="psutil")]
 use psutil;
 use statics;
 use std::vec::Vec;
 use std::collections::HashMap;
 use utils::misc::random_color;
 
+#[allow(dead_code)]
 const BYTES_TO_MEGABYTES: f64 = 1f64 / (1024f64 * 1024f64);
 // Add additional content
 command!(status(_context, message) {
@@ -54,28 +56,33 @@ command!(status(_context, message) {
     }
     let guild_and_user_count_time = Local::now();
     
+    let mut total_mem: f64 = -1.0;
+    let mut resident_mem: f64 = -1.0;
+    let mut shared_mem: f64 = -1.0;
+    let mut num_threads: String = "-1".to_owned();
     // Memory Statistics
-    let processes = match psutil::process::all() {
-        Ok(processes) => processes,
-        Err(_) => return Err("Failed to read process list".to_owned()),
-    };
-    let process = match processes.iter().find(|p| p.pid == psutil::getpid()) {
-        Some(process) => process,
-        None => return Err("Failed to retrieve information on process".to_owned()),
-    };
-    let threads = process.num_threads;
-    let memory = match process.memory() {
-        Ok(memory) => memory,
-        Err(_) => return Err("Failed to retrieve process memory usage".to_owned()),
-    };
-
-    let total_mem;
-    let resident_mem;
-    let shared_mem;
+    #[cfg(feature="psutil")]
     {
-        total_mem = memory.size as f64 * BYTES_TO_MEGABYTES;
-        resident_mem = memory.resident as f64 * BYTES_TO_MEGABYTES;
-        shared_mem = memory.share as f64 * BYTES_TO_MEGABYTES;
+        let processes = match psutil::process::all() {
+            Ok(processes) => processes,
+            Err(_) => return Err("Failed to read process list".to_owned()),
+        };
+        let process = match processes.iter().find(|p| p.pid == psutil::getpid()) {
+            Some(process) => process,
+            None => return Err("Failed to retrieve information on process".to_owned()),
+        };
+        let threads = process.num_threads;
+        let memory = match process.memory() {
+            Ok(memory) => memory,
+            Err(_) => return Err("Failed to retrieve process memory usage".to_owned()),
+        };
+
+        {
+            total_mem = memory.size as f64 * BYTES_TO_MEGABYTES;
+            resident_mem = memory.resident as f64 * BYTES_TO_MEGABYTES;
+            shared_mem = memory.share as f64 * BYTES_TO_MEGABYTES;
+            num_threads = threads.to_string();
+        }
     }
     let memory_and_procress_time = Local::now();
 
@@ -97,7 +104,7 @@ command!(status(_context, message) {
                 f.name("Memory Usage")
                     .value(
                         &format!("**Thread Count**: {}\n**Total**: {:.2} MB\n**Resident**: {:.2} MB\n**Shared**: {:.2} MB",
-                            threads.to_string(),
+                            num_threads,
                             round_with_precision(total_mem, 2),
                             round_with_precision(resident_mem, 2),
                             round_with_precision(shared_mem, 2))))
