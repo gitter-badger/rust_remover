@@ -11,6 +11,7 @@ use utils::misc::random_color;
 const BYTES_TO_MEGABYTES: f64 = 1f64 / (1024f64 * 1024f64);
 // Add additional content
 command!(status(_context, message) {
+    let tnow = Local::now();
     let ca = match CACHE.read() {
         Ok(cache) => cache,
         Err(_) => return Err("Failed to lock cache".to_owned()),
@@ -25,8 +26,7 @@ command!(status(_context, message) {
         let data = _context.data.lock().unwrap();
         starttime = *data.get::<StartupTime>().unwrap();
     }
-    let tnow = Local::now();
-
+    let init_and_cache_lock_time = Local::now();
     // Guild Info
     let mut guild_count: usize = 0;
     let mut channel_count: usize = 0;
@@ -52,6 +52,7 @@ command!(status(_context, message) {
         user_unique_count = user_ids.len();
         user_duplicate_count = user_count - user_unique_count - guild_count + 1;
     }
+    let guild_and_user_count_time = Local::now();
     
     // Memory Statistics
     let processes = match psutil::process::all() {
@@ -76,8 +77,13 @@ command!(status(_context, message) {
         resident_mem = memory.resident as f64 * BYTES_TO_MEGABYTES;
         shared_mem = memory.share as f64 * BYTES_TO_MEGABYTES;
     }
+    let memory_and_procress_time = Local::now();
 
     let stcs = statics::Statics::get();
+
+    let time_diff_init = init_and_cache_lock_time.signed_duration_since(tnow);
+    let time_diff_guilds = guild_and_user_count_time.signed_duration_since(init_and_cache_lock_time);
+    let time_diff_memory = memory_and_procress_time.signed_duration_since(guild_and_user_count_time);
 
     if let Err(why) = message.channel_id.send_message(
         |m| m.content(" ").embed(
@@ -100,10 +106,13 @@ command!(status(_context, message) {
                 .name("Infos")
                 .value(&format!("**Target**: {}\n**Authors**: {}\n**Project Name**: {}\n**Version**: {}", 
                         stcs.target, stcs.cargp_pkg_authors, stcs.cargo_pkg_name, stcs.cargo_pkg_version)))
+            .footer(|foot| foot.text(&format!("Processing Time: {}ms init, {}ms guildcount, {}ms memory", time_diff_init.num_milliseconds(), time_diff_guilds.num_milliseconds(), time_diff_memory.num_milliseconds())))
         )
     ) { // Actual if block begins here
         warn!("Sending status failed because: {:?}", why);
     }
+    let send_time = Local::now().signed_duration_since(memory_and_procress_time).num_milliseconds();
+    debug!("Info Command took {}ms to send.", send_time);
 });
 
 fn duration_to_ascii(d: Duration) -> String {
