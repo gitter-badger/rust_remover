@@ -57,9 +57,13 @@ command!(status(_context, message) {
     }
     let guild_and_user_count_time = Local::now();
     
+    #[allow(unused_assignments)]
     let mut total_mem: f64 = -1.0;
+    #[allow(unused_assignments)]
     let mut resident_mem: f64 = -1.0;
+    #[allow(unused_assignments)]
     let mut shared_mem: f64 = -1.0;
+    #[allow(unused_assignments)]
     let mut num_threads: String = "-1".to_owned();
     // Memory Statistics
     #[cfg(feature="memory-stats")]
@@ -77,7 +81,6 @@ command!(status(_context, message) {
             Ok(memory) => memory,
             Err(_) => return Err("Failed to retrieve process memory usage".to_owned()),
         };
-
         {
             total_mem = memory.size as f64 * BYTES_TO_MEGABYTES;
             resident_mem = memory.resident as f64 * BYTES_TO_MEGABYTES;
@@ -94,7 +97,7 @@ command!(status(_context, message) {
     let time_diff_memory = memory_and_procress_time.signed_duration_since(guild_and_user_count_time);
 
     let mut memusagefield = CreateEmbedField::default();
-    // Used if PSUtils is not present
+    // Used if PSUtils is present
     #[cfg(feature = "memory-stats")]
     {
         memusagefield = memusagefield.name("Memory Usage").value(&format!("**Thread Count**: {}\n**Total**: {:.2} MB\n**Resident**: {:.2} MB\n**Shared**: {:.2} MB",
@@ -107,7 +110,9 @@ command!(status(_context, message) {
 
     // Used if PSUtils is not present
     #[cfg(not(feature = "memory-stats"))]
-    { memusagefield = memusagefield.name("Memory Usage").value("Memory Usage module unavalible on this platform"); }
+    { 
+        memusagefield = memusagefield.name("Memory Usage").value("Memory Usage module unavalible on this platform"); 
+    }
     if let Err(why) = message.channel_id.send_message(
         |m| m.content(" ").embed(
             |e| e.author(

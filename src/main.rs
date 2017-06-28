@@ -173,6 +173,12 @@ fn build_framework(f: Framework) -> Framework {
                 .exec_str("Twitch is probably broken again.\nBut should it work, theres an account you could check out: https://twitch.tv/the__cj")
                 .desc("About Twitch")));
 
+    f = f.group("Reminders", |g| g
+            .command("remind", |c| c
+                .bucket("extended")
+                .exec(cmd::remind::add_reminder)
+                .check(owner_check)
+                .desc("Add an reminder for an duration\n**REQUIRED**: Bot Owner")));
     f
 }
 

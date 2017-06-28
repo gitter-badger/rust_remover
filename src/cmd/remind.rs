@@ -3,10 +3,11 @@ use serenity::client::Context;
 use chrono::Duration;
 use std::vec::Vec;
 
-fn add_reminder(context: &mut Context, message: &Message, args: Vec<String>) -> Result<(), String> {
+pub fn add_reminder(context: &mut Context, message: &Message, args: Vec<String>) -> Result<(), String> {
     if args.len() < 2 {
         return Err("To few arguments".to_owned());
     }
+    let _ = message.reply(&format!("{:?}", args));
     Ok(())
 }
 
