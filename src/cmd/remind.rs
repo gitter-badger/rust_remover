@@ -2,7 +2,8 @@ use serenity::model::Message;
 use serenity::client::Context;
 use chrono::Duration;
 use std::vec::Vec;
-#[cfg_attr(freature = "clippy", allow(needless_pass_by_value))]
+
+#[cfg_attr(feature = "clippy", allow(needless_pass_by_value))]
 pub fn add_reminder(context: &mut Context, message: &Message, args: Vec<String>) -> Result<(), String> {
     if args.len() < 2 {
         return Err("To few arguments".to_owned());

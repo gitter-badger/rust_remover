@@ -10,6 +10,9 @@ description = "Privat Discord bot with (soon to be) Cleverbot Integration & many
 default = ["memory-stats"]
 
 memory-stats = ["psutil"]
+cleverbot = ["reqwest", "url"]
+# Used for some of the warning supressions of clippy
+clippy = [] 
 
 [dependencies]
 log = "0.3.8"
@@ -21,17 +24,17 @@ serde_derive = "1"
 futures = "0.1"
 base64 = "0.6"
 rust-crypto="^0.2"
-# pretty_env_logger = "0.1"
-reqwest = "0.6.2"
 chrono = "0.4"
 rand = "0.3"
 
 psutil = { version = "1", optional = true }
+reqwest = { version = "0.6.2", optional = true }
 
 [dependencies.serenity]
 version = "0.3"
 features = ["framework", "cache"]
 
 [dependencies.url]
+optional = true
 version = "1.5"
 git = "https://github.com/servo/rust-url"

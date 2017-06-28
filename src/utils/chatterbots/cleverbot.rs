@@ -1,12 +1,12 @@
 #[allow(dead_code)]
 static API_BASE_URL: &'static str = "https://www.cleverbot.com/getreply";
 
-use utils;
 use std::collections::HashMap;
 use reqwest;
 use serde_json::Error;
 use serde_json;
 use std::io::Read;
+use url::form_urlencoded;
 
 #[derive(Debug)]
 pub struct Cleverbot {
@@ -36,7 +36,7 @@ impl Cleverbot {
         }
 
 
-        let url = API_BASE_URL.to_owned() + "?" + utils::http_utils::params_to_www_form_url_encoded(&params).as_str();
+        let url = API_BASE_URL.to_owned() + "?" + params_to_www_form_url_encoded(&params).as_str();
 
         let mut response = reqwest::get(url.as_str()).unwrap();
 
@@ -84,18 +84,38 @@ impl CleverbotSession {
     }
 }
 
- // Stubs
-/*
- pub struct Cleverbot;
+fn params_to_www_form_url_encoded<'a>(params: &'a HashMap<&str,&str>) -> String {
+    let mut encoder = form_urlencoded::Serializer::new(String::new());
+    for (name, val) in params {
+        encoder.append_pair(name, val);
+    }
+    encoder.finish()
+}
 
- impl Cleverbot {
-     pub fn new(api_key: String) -> Cleverbot {
-         Cleverbot{}
-     }
-     pub fn think(&mut self, text: String) -> Result<String, String> {
-         if (text.len() == 0) {
-             return Err(String::from("This is the Error Method stub of Cleverbot"));
-         }
-         Ok(String::from("This is the Ok Method stub of Cleverbot"))
-     }
- }*/
+#[cfg(tests)]
+mod tests {
+    #[test]
+    fn params_to_www_form_url_encoded_test() {
+        // Empty Test
+        let v = HashMap::new();
+        assert_eq!(params_to_www_form_url_encoded(&v), "");
+        // Create DummyArray
+        let v: HashMap<&str, &str> = [
+            ("param", "data"),
+            ("qubit_dfu", "meta")
+        ].iter().cloned().collect();
+
+        // Create & split testing vectors
+        let lf = params_to_www_form_url_encoded(&v);
+        let rf = String::from("param=data&qubit_dfu=meta");
+        let left: Vec<&str> = lf.split('&').collect();
+        let right: Vec<&str> = rf.split('&').collect();
+
+        // Compare Vectors
+        for t in right {
+            if !left.contains(&t) {
+                assert!(false, format!("Missing {}", t))
+            }
+        }
+    }
+}
