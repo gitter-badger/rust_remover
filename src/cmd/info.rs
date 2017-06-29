@@ -140,7 +140,7 @@ command!(status(_context, message) {
             .title("Status")
             .colour(random_color())
             .field(|_| memusagefield)
-            .field(|f| f.name("Guild Statistics").value(&format!("*{}* Guilds\n*{}* Channels\n*{}* Users\n-> *{}* Unique\n-> *{}* Duplicates", guild_count, channel_count, user_count, user_unique_count, user_duplicate_count)))
+            .field(|f| f.name("Guild Statistics").value(&format!("*{}* Guilds\n*{}* Channels\n*{}* Users\n | -> *{}* Unique\n | -> *{}* Duplicates", guild_count, channel_count, user_count, user_unique_count, user_duplicate_count)))
             .field(|f| f
                 .name("Infos")
                 .value(&format!("**Target**: {}\n**Authors**: {}\n**Project Name**: {}\n**Version**: {}", 
@@ -237,7 +237,7 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
             .value(&format!("**Count**: {}\n**AFK Channel**: {}\n**AFK Timeout**: {}s\n", channel_count, afk_channel, afk_timeout)))
         .field(|f| f
             .name("Users")
-            .value(&format!("**Total User**: {}\n**Online Users**: {}\n -> *Online*: {}\n -> *Idle*: {}\n -> *DND*: {}", users_total, users_online_total, users_online[0], users_online[1], users_online[2])))
+            .value(&format!("**Total User**: {}\n**Online Users**: {}\n | -> *Online*: {}\n | -> *Idle*: {}\n | -> *DND*: {}", users_total, users_online_total, users_online[0], users_online[1], users_online[2])))
         .field(|f| f
             .name("Roles")
             .value(&format!("```{}```", roles))))
