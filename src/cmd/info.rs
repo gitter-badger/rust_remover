@@ -120,15 +120,15 @@ command!(status(_context, message) {
     }
 
     let str_time_init = match time_diff_init.num_nanoseconds() {
-        Some(s) => format!("{}ns", s),
+        Some(s) => format!("{:.4}ms", nanosecond_to_milisecond(s, 2)),
         None => format!("{}ms", time_diff_init.num_milliseconds())
     };
     let str_time_guilds = match time_diff_guilds.num_nanoseconds() {
-        Some(s) => format!("{}ns", s),
+        Some(s) => format!("{:.4}ms", nanosecond_to_milisecond(s, 2)),
         None => format!("{}ms", time_diff_guilds.num_milliseconds())
     };
     let str_time_memory = match time_diff_memory.num_nanoseconds() {
-        Some(s) => format!("{}ns", s),
+        Some(s) => format!("{:.4}ms", nanosecond_to_milisecond(s, 2)),
         None => format!("{}ms", time_diff_memory.num_milliseconds())
     };
     if let Err(why) = message.channel_id.send_message(
@@ -248,6 +248,7 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
     Ok(())
 }
 
+
 fn duration_to_ascii(d: Duration) -> String {
     let mut delta = d;
     let weeks = delta.num_weeks();
@@ -267,6 +268,16 @@ fn duration_to_ascii(d: Duration) -> String {
         minutes,
         seconds
     ))
+}
+// TODO Move to utils.rs
+#[inline]
+fn nanosecond_to_milisecond(ns: i64, sigdig: i32) -> f64 {
+    if ns <= 0 {
+        return 0.0;
+    }
+    let x = ns as f64 / 1000000.0;
+    let sc = 10f64.powf(x.abs().log10().floor());
+    return sc * round_with_precision(x / sc, sigdig)
 }
 
 #[inline]
