@@ -1,10 +1,15 @@
+#[macro_use] extern crate serde_derive;
+extern crate url;
+extern crate reqwest;
+extern crate serde_json;
+extern crate serde;
+
+
 #[allow(dead_code)]
 static API_BASE_URL: &'static str = "https://www.cleverbot.com/getreply";
 
 use std::collections::HashMap;
-use reqwest;
 use serde_json::Error;
-use serde_json;
 use std::io::Read;
 use url::form_urlencoded;
 

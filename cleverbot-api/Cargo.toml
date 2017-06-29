@@ -1,0 +1,13 @@
+[package]
+name = "cleverbot_api"
+version = "0.1.0"
+authors = ["heapunderflow"]
+
+[dependencies]
+reqwest = "0.6"
+serde_json = "1"
+serde_derive = "1"
+serde = "1"
+[dependencies.url]
+version = "1.5"
+git = "https://github.com/servo/rust-url"

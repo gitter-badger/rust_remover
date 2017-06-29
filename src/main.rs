@@ -11,12 +11,12 @@ extern crate typemap;
 extern crate serde;
 extern crate serde_json;
 extern crate crypto;
-extern crate url;
-extern crate reqwest;
 extern crate chrono;
 #[cfg(feature="memory-stats")]
 extern crate psutil;
 extern crate rand;
+#[cfg(feature = "cleverbot")]
+extern crate cleverbot_api;
 
 // Custom "Crates -> Modules"
 mod cmd;
@@ -47,6 +47,7 @@ fn main() {
         Err(_) => String::from("log4rs.yml")
     };
     let mut client = Client::new(&env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN"));
+    #[cfg(feature = "cleverbot")]
     let cleverbot_token = env::var("CLEVERBOT_TOKEN").expect("CLEVERBOT_TOKEN");
     // Init Logger
     log4rs::init_file(logfile, Default::default()).unwrap();
@@ -58,6 +59,7 @@ fn main() {
         let mut data = client.data.lock().unwrap();
         data.insert::<CommandCounter>(HashMap::default());
         data.insert::<StartupTime>(Local::now());
+        #[cfg(feature = "cleverbot")]
         data.insert::<CleverbotToken>(String::from(cleverbot_token));
     }
     // Contruct avalible commands
@@ -149,22 +151,24 @@ fn build_framework(f: Framework) -> Framework {
             .exec(cmd::utilcmd::purge)
             .check(owner_check)
             .desc("Purges x messages\n**REQUIRED**: Bot Owner")));
-    
-    // Cleverbot Commands
-    f = f.group("Cleverbot", |g| g
-            .command("think", |c| c
-                .bucket("extended")
-                .exec(cmd::cleverbot::think)
-                .known_as("ask")
-                .known_as("cleverbot")
-                .known_as("cb")
-                .check(owner_check)
-                .desc("Ask Cleverbot (if the API isnt Broken)\n**REQUIRED**: Bot Owner"))
-            .command("cbrestart", |c| c
-                .bucket("extended")
-                .exec(cmd::cleverbot::restart)
-                .desc("Reinitialize the Cleverbot Session\n**REQUIRED**: Bot Owner")
-                .check(owner_check)));
+    #[cfg(feature = "cleverbot")]
+    {
+        // Cleverbot Commands
+        f = f.group("Cleverbot", |g| g
+                .command("think", |c| c
+                    .bucket("extended")
+                    .exec(cmd::cleverbot::think)
+                    .known_as("ask")
+                    .known_as("cleverbot")
+                    .known_as("cb")
+                    .check(owner_check)
+                    .desc("Ask Cleverbot (if the API isnt Broken)\n**REQUIRED**: Bot Owner"))
+                .command("cbrestart", |c| c
+                    .bucket("extended")
+                    .exec(cmd::cleverbot::restart)
+                    .desc("Reinitialize the Cleverbot Session\n**REQUIRED**: Bot Owner")
+                    .check(owner_check)));
+    }
     
     // Misc Commands
     f = f.group("Misc", |g| g

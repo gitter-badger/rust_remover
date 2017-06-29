@@ -1,5 +1,5 @@
 use serenity::client::Context;
-use utils::chatterbots::cleverbot::Cleverbot;
+use cleverbot_api::Cleverbot;
 use utils::sharekvp::CleverbotToken;
 
 #[allow(dead_code)]
@@ -16,7 +16,6 @@ command!(restart(_ctx, message, _args) {
         },
         Err(s) => {let _ = message.reply(&format!("Error: ```{:?}```", s)); ()}
     }
-    
 });
 
 #[allow(dead_code)]
