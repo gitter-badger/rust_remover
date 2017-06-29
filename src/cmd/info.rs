@@ -1,14 +1,19 @@
 use serenity::client::CACHE;
+use serenity::utils::builder::CreateEmbedField;
+use serenity::model::{Message, GuildId, UserId, Guild, OnlineStatus, VerificationLevel};
+use serenity::client::Context;
+
 use utils::sharekvp::StartupTime;
+use utils::misc::random_color;
 use chrono::{Local, Duration};
-use serenity::model::UserId;
-#[cfg(feature="memory-stats")]
-use psutil;
-use statics;
 use std::vec::Vec;
 use std::collections::HashMap;
-use utils::misc::random_color;
-use serenity::utils::builder::CreateEmbedField;
+use std::ops::Deref;
+
+use statics;
+
+#[cfg(feature="memory-stats")]
+use psutil;
 
 #[allow(dead_code)]
 const BYTES_TO_MEGABYTES: f64 = 1f64 / (1024f64 * 1024f64);
@@ -113,6 +118,19 @@ command!(status(_context, message) {
     { 
         memusagefield = memusagefield.name("Memory Usage").value("Memory Usage module unavalible on this platform"); 
     }
+
+    let str_time_init = match time_diff_init.num_nanoseconds() {
+        Some(s) => format!("{}ns", s),
+        None => format!("{}ms", time_diff_init.num_milliseconds())
+    };
+    let str_time_guilds = match time_diff_guilds.num_nanoseconds() {
+        Some(s) => format!("{}ns", s),
+        None => format!("{}ms", time_diff_guilds.num_milliseconds())
+    };
+    let str_time_memory = match time_diff_memory.num_nanoseconds() {
+        Some(s) => format!("{}ns", s),
+        None => format!("{}ms", time_diff_memory.num_milliseconds())
+    };
     if let Err(why) = message.channel_id.send_message(
         |m| m.content(" ").embed(
             |e| e.author(
@@ -127,7 +145,7 @@ command!(status(_context, message) {
                 .name("Infos")
                 .value(&format!("**Target**: {}\n**Authors**: {}\n**Project Name**: {}\n**Version**: {}", 
                         stcs.target, stcs.cargp_pkg_authors, stcs.cargo_pkg_name, stcs.cargo_pkg_version)))
-            .footer(|foot| foot.text(&format!("Processing Time: {}ms init, {}ms guildcount, {}ms memory", time_diff_init.num_milliseconds(), time_diff_guilds.num_milliseconds(), time_diff_memory.num_milliseconds())))
+            .footer(|foot| foot.text(&format!("Processing Time: {} init, {} guildcount, {} memory", str_time_init, str_time_guilds, str_time_memory)))
         )
     ) { // Actual if block begins here
         warn!("Sending status failed because: {:?}", why);
@@ -135,6 +153,100 @@ command!(status(_context, message) {
     let send_time = Local::now().signed_duration_since(memory_and_procress_time).num_milliseconds();
     debug!("Info Command took {}ms to send.", send_time);
 });
+
+#[cfg_attr(feature = "clippy", allow(needless_pass_by_value))]
+pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Result<(), String> {
+    let guildid: GuildId;
+    if args.len() >= 1 {
+        match args[0].parse::<u64>() {
+            Ok(n) => guildid = GuildId::from(n),
+            Err(e) => return Err(format!("Unable to parse GuildId: {:?}", e))
+        }
+    } else {
+        guildid = match message.guild_id() {
+            Some(gid) => gid,
+            None => return Err("Not an Guild".to_owned())
+        }
+    }
+
+    let tmguild = match guildid.find() {
+        Some(g) => g,
+        None => return Err("Unable to find Guild".to_owned())
+    };
+    let readguild = tmguild.read().unwrap();
+
+    let guild: &Guild = readguild.deref();
+
+    let verifiaction_level = match guild.verification_level {
+        VerificationLevel::None => "Does not require any verification.",
+        VerificationLevel::Low => "Must have a verified email on the user's Discord account.",
+        VerificationLevel::Medium => "Must also be a registered user on Discord for longer than 5 minutes.",
+        VerificationLevel::High => "Must also be a member of the guild for longer than 10 minutes.",
+        VerificationLevel::Higher => "Must have a verified phone on the user's Discord account."
+    };
+
+    let guild_owner = match guild.owner_id.get() {
+        Ok(u) => format!("{}#{} ({})", u.name, u.discriminator, u.id.0),
+        Err(_) => "~ Unable to retrieve Owner".to_owned()
+    };
+
+
+    let channel_count = &guild.channels.len();
+
+    let afk_channel = match guild.afk_channel_id {
+        Some(id) => match id.get() {
+            Ok(c) => format!("{}", c),
+            Err(_) => format!("None (ID: {})", id.0)
+        },
+        None => "No AFK Channel".to_owned()
+    };
+
+    let afk_timeout = guild.afk_timeout;
+
+    let guild_region = &guild.region;
+
+    let users_total = guild.member_count;
+    // [Online, Idle, DND]
+    let mut users_online = &mut [0, 0, 0];
+
+
+    for (_, presence) in &guild.presences {
+        if presence.status == OnlineStatus::Online {
+            users_online[0] += 1;
+        } else if presence.status == OnlineStatus::Idle {
+            users_online[1] += 1;
+        } else if presence.status == OnlineStatus::DoNotDisturb {
+            users_online[2] += 1;
+        }
+    }
+
+    let users_online_total = users_online[0] + users_online[1] + users_online[2];
+
+    let mut roles = String::new();
+
+    for (role_id, role_name) in &guild.roles {
+        roles.push_str(&format!("{} {}\n", role_id, role_name));
+    }
+
+
+    if let Err(why) = message.channel_id.send_message(|m| m.content(" ").embed(|e| e
+        .title(&format!("Statistics for {}", guild.name))
+        .description(&format!("**Owner**: {}\n**Verification**: {}\n**Region**: {}", guild_owner, verifiaction_level, guild_region))
+        .field(|f| f
+            .name("Channels")
+            .value(&format!("**Count**: {}\n**AFK Channel**: {}\n**AFK Timeout**: {}s\n", channel_count, afk_channel, afk_timeout)))
+        .field(|f| f
+            .name("Users")
+            .value(&format!("**Total User**: {}\n**Online Users**: {}\n -> *Online*: {}\n -> *Idle*: {}\n -> *DND*: {}", users_total, users_online_total, users_online[0], users_online[1], users_online[2])))
+        .field(|f| f
+            .name("Roles")
+            .value(&format!("```{}```", roles))))
+    ) {
+        warn!("Sending infos failed because: {:?}", why); 
+    }
+
+    Ok(())
+}
 
 fn duration_to_ascii(d: Duration) -> String {
     let mut delta = d;

@@ -12,9 +12,11 @@ extern crate serde;
 extern crate serde_json;
 extern crate crypto;
 extern crate chrono;
+extern crate rand;
+
 #[cfg(feature="memory-stats")]
 extern crate psutil;
-extern crate rand;
+
 #[cfg(feature = "cleverbot")]
 extern crate cleverbot_api;
 
@@ -150,7 +152,13 @@ fn build_framework(f: Framework) -> Framework {
         .command("purge", |c| c
             .exec(cmd::utilcmd::purge)
             .check(owner_check)
-            .desc("Purges x messages\n**REQUIRED**: Bot Owner")));
+            .desc("Purges x messages\n**REQUIRED**: Bot Owner"))
+        .command("guild_info", |c| c
+            .exec(cmd::info::guild_info)
+            .check(owner_check)
+            .desc("Retrieves info about the Guild\n**REQUIRED**: Bot Owner")
+            .known_as("guildinfp")
+            .known_as("iguild")));
     #[cfg(feature = "cleverbot")]
     {
         // Cleverbot Commands

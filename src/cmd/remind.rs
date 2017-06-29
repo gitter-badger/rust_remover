@@ -4,6 +4,7 @@ use chrono::Duration;
 use std::vec::Vec;
 
 #[cfg_attr(feature = "clippy", allow(needless_pass_by_value))]
+#[allow(unused_variables)] // TODO Fix
 pub fn add_reminder(context: &mut Context, message: &Message, args: Vec<String>) -> Result<(), String> {
     if args.len() < 2 {
         return Err("To few arguments".to_owned());
