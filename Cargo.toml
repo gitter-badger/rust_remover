@@ -27,18 +27,15 @@ rust-crypto="^0.2"
 chrono = "0.4"
 rand = "0.3"
 
-psutil = { version = "1", optional = true }
-
 [dependencies.serenity]
 version = "0.3"
 features = ["framework", "cache"]
 
-[dependencies.url]
+[dependencies.psutil] # Optional for the Bot memory stat Feature
+version = "1"
 optional = true
-version = "1.5"
-git = "https://github.com/servo/rust-url"
 
-[dependencies.cleverbot_api]
+[dependencies.cleverbot_api] # Optional cleverbot-api crate
 path = "./cleverbot-api"
 version = "0.1"
 optional = true
