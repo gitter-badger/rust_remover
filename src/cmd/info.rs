@@ -1,11 +1,13 @@
 use serenity::client::CACHE;
 use serenity::utils::builder::CreateEmbedField;
-use serenity::model::{Message, GuildId, UserId, Guild, OnlineStatus, VerificationLevel};
+use serenity::model::{Message, GuildId, UserId, Guild, Role, OnlineStatus, VerificationLevel};
 use serenity::client::Context;
 
 use utils::sharekvp::StartupTime;
 use utils::misc::random_color;
 use chrono::{Local, Duration};
+// use rayon::prelude::*;
+use rayon;
 use std::vec::Vec;
 use std::collections::HashMap;
 use std::ops::Deref;
@@ -222,10 +224,16 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
 
     let users_online_total = users_online[0] + users_online[1] + users_online[2];
 
-    let mut roles = String::new();
-
-    for (role_id, role_name) in &guild.roles {
-        roles.push_str(&format!("{} {}\n", role_id, role_name.name));
+    let mut role_string = String::new();
+    {
+        let mut roles: Vec<Role> = guild.roles.values().cloned().collect();
+        quick_sort(&mut roles);
+        roles.reverse();
+        role_string.push_str(&format!("{:18} {:4} {}\n", "ID", "Pos", "Name"));
+        role_string.push_str(&format!("{:18} {:4} {}\n", "---", "---", "---"));
+        for role in roles {
+            role_string.push_str(&format!("{:18} {:4} {}\n", role.id, role.position, role.name));
+        }
     }
 
 
@@ -240,7 +248,7 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
             .value(&format!("**Total User**: {}\n**Online Users**: {}\n | -> *Online*: {}\n | -> *Idle*: {}\n | -> *DND*: {}", users_total, users_online_total, users_online[0], users_online[1], users_online[2])))
         .field(|f| f
             .name("Roles")
-            .value(&format!("```{}```", roles))))
+            .value(&format!("```{}```", role_string))))
     ) {
         warn!("Sending infos failed because: {:?}", why); 
     }
@@ -284,4 +292,28 @@ fn nanosecond_to_milisecond(ns: i64, sigdig: i32) -> f64 {
 fn round_with_precision(num: f64, precision: i32) -> f64 {
     let power = 10f64.powi(precision);
     (num * power).round() / power
+}
+
+fn quick_sort<T:PartialOrd+Send>(v: &mut [T]) {
+    if v.len() <= 1 {
+        return;
+    }
+
+    let mid = partition(v);
+    let (lo, hi) = v.split_at_mut(mid);
+    rayon::join(|| quick_sort(lo), || quick_sort(hi));
+}
+
+fn partition<T:PartialOrd+Send>(v: &mut [T]) -> usize {
+    let pivot = v.len() - 1;
+    let mut i = 0;
+    #[cfg_attr(feature = "clippy", allow(needless_range_loop))]
+    for j in 0..pivot {
+        if v[j] <= v[pivot] {
+            v.swap(i, j);
+            i += 1;
+        }
+    }
+    v.swap(i, pivot);
+    i
 }

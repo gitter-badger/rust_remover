@@ -26,6 +26,7 @@ base64 = "0.6"
 rust-crypto="^0.2"
 chrono = "0.4"
 rand = "0.3"
+rayon = "0.8"
 
 [dependencies.serenity]
 version = "0.3"

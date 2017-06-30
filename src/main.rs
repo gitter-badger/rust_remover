@@ -13,6 +13,7 @@ extern crate serde_json;
 extern crate crypto;
 extern crate chrono;
 extern crate rand;
+extern crate rayon;
 
 #[cfg(feature="memory-stats")]
 extern crate psutil;
