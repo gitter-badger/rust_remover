@@ -44,17 +44,17 @@ command!(status(_context, message) {
 
     {
         let mut user_ids: HashMap<UserId, u32> = HashMap::new();
-        for (_, guild) in &ca.guilds {
+        for guild in ca.guilds.values() {
             if let Ok(g) = guild.read() {
                 guild_count += 1;
                 channel_count += g.channels.len() as usize;
-                for (memberid, _) in &g.members {
+                for memberid in g.members.keys() {
                     let member = user_ids.entry(*memberid).or_insert(0);
                     *member += 1;
                 }
             }
         }
-        for (_, count) in &user_ids {
+        for count in user_ids.values() {
             user_count += *count as usize;
         }
         user_unique_count = user_ids.len();
@@ -210,7 +210,7 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
     let mut users_online = &mut [0, 0, 0];
 
 
-    for (_, presence) in &guild.presences {
+    for presence in guild.presences.values() {
         if presence.status == OnlineStatus::Online {
             users_online[0] += 1;
         } else if presence.status == OnlineStatus::Idle {
@@ -225,7 +225,7 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
     let mut roles = String::new();
 
     for (role_id, role_name) in &guild.roles {
-        roles.push_str(&format!("{} {}\n", role_id, role_name));
+        roles.push_str(&format!("{} {}\n", role_id, role_name.name));
     }
 
 
@@ -277,7 +277,7 @@ fn nanosecond_to_milisecond(ns: i64, sigdig: i32) -> f64 {
     }
     let x = ns as f64 / 1000000.0;
     let sc = 10f64.powf(x.abs().log10().floor());
-    return sc * round_with_precision(x / sc, sigdig)
+    sc * round_with_precision(x / sc, sigdig)
 }
 
 #[inline]

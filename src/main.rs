@@ -34,7 +34,9 @@ use serenity::ext::framework::Framework;
 use std::env;
 use std::collections::HashMap;
 use std::fmt::Write;
-use utils::sharekvp::{CommandCounter, StartupTime, CleverbotToken};
+use utils::sharekvp::{CommandCounter, StartupTime};
+#[cfg(feature = "cleverbot")]
+use utils::sharekvp::CleverbotToken;
 use chrono::prelude::Local;
 
 const CLIENT_PREFIX: &'static str = "x?";
@@ -83,7 +85,7 @@ fn main() {
     // start listening for events by starting a single shard
     let v = client.start();
 
-    println!("Exited...\nCode Recieved:\n{:?}", v);
+    error!("Client Crash !\nError Code:\n{:#?}", v);
 
 }
 

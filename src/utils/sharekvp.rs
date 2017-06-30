@@ -14,8 +14,10 @@ impl Key for StartupTime {
     type Value = DateTime<Local>;
 }
 
+#[cfg(feature = "cleverbot")]
 pub struct CleverbotToken;
 
+#[cfg(feature = "cleverbot")]
 impl Key for CleverbotToken {
     type Value = String;
 }
