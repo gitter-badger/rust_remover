@@ -4,10 +4,8 @@ use serenity::model::{Message, GuildId, UserId, Guild, Role, OnlineStatus, Verif
 use serenity::client::Context;
 
 use utils::sharekvp::StartupTime;
-use utils::misc::random_color;
+use utils;
 use chrono::{Local, Duration};
-// use rayon::prelude::*;
-use rayon;
 use std::vec::Vec;
 use std::collections::HashMap;
 use std::ops::Deref;
@@ -109,9 +107,9 @@ command!(status(_context, message) {
     {
         memusagefield = memusagefield.name("Memory Usage").value(&format!("**Thread Count**: {}\n**Total**: {:.2} MB\n**Resident**: {:.2} MB\n**Shared**: {:.2} MB",
                             num_threads,
-                            round_with_precision(total_mem, 2),
-                            round_with_precision(resident_mem, 2),
-                            round_with_precision(shared_mem, 2))
+                            utils::round_with_precision(total_mem, 2),
+                            utils::round_with_precision(resident_mem, 2),
+                            utils::round_with_precision(shared_mem, 2))
         );
     }
 
@@ -122,15 +120,15 @@ command!(status(_context, message) {
     }
 
     let str_time_init = match time_diff_init.num_nanoseconds() {
-        Some(s) => format!("{:.4}ms", nanosecond_to_milisecond(s, 2)),
+        Some(s) => format!("{:.4}ms", utils::nanosecond_to_milisecond(s, 2)),
         None => format!("{}ms", time_diff_init.num_milliseconds())
     };
     let str_time_guilds = match time_diff_guilds.num_nanoseconds() {
-        Some(s) => format!("{:.4}ms", nanosecond_to_milisecond(s, 2)),
+        Some(s) => format!("{:.4}ms", utils::nanosecond_to_milisecond(s, 2)),
         None => format!("{}ms", time_diff_guilds.num_milliseconds())
     };
     let str_time_memory = match time_diff_memory.num_nanoseconds() {
-        Some(s) => format!("{:.4}ms", nanosecond_to_milisecond(s, 2)),
+        Some(s) => format!("{:.4}ms", utils::nanosecond_to_milisecond(s, 2)),
         None => format!("{}ms", time_diff_memory.num_milliseconds())
     };
     if let Err(why) = message.channel_id.send_message(
@@ -140,7 +138,7 @@ command!(status(_context, message) {
             )
             .description(&format!("**Started**: {}\n**Uptime**: {}", starttime.to_rfc2822(), duration_to_ascii(tnow.signed_duration_since(starttime.to_owned()))))
             .title("Status")
-            .colour(random_color())
+            .colour(utils::random_color())
             .field(|_| memusagefield)
             .field(|f| f.name("Guild Statistics").value(&format!("*{}* Guilds\n*{}* Channels\n*{}* Users\n | -> *{}* Unique\n | -> *{}* Duplicates", guild_count, channel_count, user_count, user_unique_count, user_duplicate_count)))
             .field(|f| f
@@ -227,7 +225,7 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
     let mut role_string = String::new();
     {
         let mut roles: Vec<Role> = guild.roles.values().cloned().collect();
-        quick_sort(&mut roles);
+        utils::quick_sort(&mut roles);
         roles.reverse();
         role_string.push_str(&format!("{:18} {:4} {}\n", "ID", "Pos", "Name"));
         role_string.push_str(&format!("{:18} {:4} {}\n", "---", "---", "---"));
@@ -276,44 +274,4 @@ fn duration_to_ascii(d: Duration) -> String {
         minutes,
         seconds
     ))
-}
-// TODO Move to utils.rs
-#[inline]
-fn nanosecond_to_milisecond(ns: i64, sigdig: i32) -> f64 {
-    if ns <= 0 {
-        return 0.0;
-    }
-    let x = ns as f64 / 1000000.0;
-    let sc = 10f64.powf(x.abs().log10().floor());
-    sc * round_with_precision(x / sc, sigdig)
-}
-
-#[inline]
-fn round_with_precision(num: f64, precision: i32) -> f64 {
-    let power = 10f64.powi(precision);
-    (num * power).round() / power
-}
-
-fn quick_sort<T:PartialOrd+Send>(v: &mut [T]) {
-    if v.len() <= 1 {
-        return;
-    }
-
-    let mid = partition(v);
-    let (lo, hi) = v.split_at_mut(mid);
-    rayon::join(|| quick_sort(lo), || quick_sort(hi));
-}
-
-fn partition<T:PartialOrd+Send>(v: &mut [T]) -> usize {
-    let pivot = v.len() - 1;
-    let mut i = 0;
-    #[cfg_attr(feature = "clippy", allow(needless_range_loop))]
-    for j in 0..pivot {
-        if v[j] <= v[pivot] {
-            v.swap(i, j);
-            i += 1;
-        }
-    }
-    v.swap(i, pivot);
-    i
 }
