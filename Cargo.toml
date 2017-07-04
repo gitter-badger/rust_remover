@@ -30,7 +30,7 @@ rayon = "0.8"
 
 [dependencies.serenity]
 version = "0.3"
-features = ["framework", "cache"]
+features = ["framework", "cache", "voice"]
 
 [dependencies.psutil] # Optional for the Bot memory stat Feature
 version = "1"
