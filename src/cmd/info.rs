@@ -131,7 +131,7 @@ command!(status(_context, message) {
         Some(s) => format!("{:.4}ms", utils::nanosecond_to_milisecond(s, 2)),
         None => format!("{}ms", time_diff_memory.num_milliseconds())
     };
-    if let Err(why) = message.channel_id.send_message(
+    utils::check_message(message.channel_id.send_message(
         |m| m.content(" ").embed(
             |e| e.author(
                 |a| a.icon_url(uri.as_str()).name(ca.user.name.as_str())
@@ -147,9 +147,7 @@ command!(status(_context, message) {
                         stcs.target, stcs.cargp_pkg_authors, stcs.cargo_pkg_name, stcs.cargo_pkg_version)))
             .footer(|foot| foot.text(&format!("Processing Time: {} init, {} guildcount, {} memory", str_time_init, str_time_guilds, str_time_memory)))
         )
-    ) { // Actual if block begins here
-        warn!("Sending status failed because: {:?}", why);
-    }
+    ));
     let send_time = Local::now().signed_duration_since(memory_and_procress_time).num_milliseconds();
     debug!("Info Command took {}ms to send.", send_time);
 });
@@ -235,7 +233,7 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
     }
 
 
-    if let Err(why) = message.channel_id.send_message(|m| m.content(" ").embed(|e| e
+    utils::check_message(message.channel_id.send_message(|m| m.content(" ").embed(|e| e
         .title(&format!("Statistics for {}", guild.name))
         .description(&format!("**Owner**: {}\n**Verification**: {}\n**Region**: {}", guild_owner, verifiaction_level, guild_region))
         .field(|f| f
@@ -247,9 +245,7 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
         .field(|f| f
             .name("Roles")
             .value(&format!("```{}```", role_string))))
-    ) {
-        warn!("Sending infos failed because: {:?}", why); 
-    }
+    ));
 
     Ok(())
 }

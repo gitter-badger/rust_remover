@@ -3,13 +3,14 @@ use serenity::client::CACHE;
 use serenity::model::{Message, MessageId, UserId};
 use serenity::client::Context;
 use chrono::Local;
+use utils;
 
 command!(embed(_ctx, msg, _args, _text: String) {
     let s: String = _args.join(" ");
     let jsprs = JsonToDiscordEmbedObject::new();
-    let _ = match jsprs.parse(s.as_str()) {
-        Ok(r) => msg.channel_id.send_message(|m| m.content(" ").embed(|_| r)),
-        Err(e) => msg.channel_id.send_message(|m| m.content(format!("**ERROR**\n```{}```", e).as_str()))
+    match jsprs.parse(s.as_str()) {
+        Ok(r) => utils::check_message(msg.channel_id.send_message(|m| m.content(" ").embed(|_| r))),
+        Err(e) => utils::check_message(msg.channel_id.send_message(|m| m.content(format!("**ERROR**\n```{}```", e).as_str())))
     };
     let _ = msg.delete();
 });
