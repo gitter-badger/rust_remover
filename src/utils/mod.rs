@@ -1,7 +1,7 @@
 use serenity::utils::Colour;
 use rand::{thread_rng, Rng};
 use serenity::Result as SerenityResult;
-use serenity::model::Message as SerenityyMessage;
+use serenity::model::Message as SerenityMessage;
 use rayon;
 
 // Additional Utilitys
@@ -9,7 +9,7 @@ pub mod sharekvp;
 pub mod linear_parse;
 
 
-fn check_message(result: SerenityResult<SerenityMessage>) {
+pub fn check_message(result: SerenityResult<SerenityMessage>) {
     if let Err(why) = result {
         warn!("Error sending message: {:?}", why);
     }
