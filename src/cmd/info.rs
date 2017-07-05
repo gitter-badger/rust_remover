@@ -131,7 +131,7 @@ command!(status(_context, message) {
         Some(s) => format!("{:.4}ms", utils::nanosecond_to_milisecond(s, 2)),
         None => format!("{}ms", time_diff_memory.num_milliseconds())
     };
-    utils::check_message(message.channel_id.send_message(
+    utils::check_msg(message.channel_id.send_message(
         |m| m.content(" ").embed(
             |e| e.author(
                 |a| a.icon_url(uri.as_str()).name(ca.user.name.as_str())
@@ -233,7 +233,7 @@ pub fn guild_info(_: &mut Context, message: &Message, args: Vec<String>) -> Resu
     }
 
 
-    utils::check_message(message.channel_id.send_message(|m| m.content(" ").embed(|e| e
+    utils::check_msg(message.channel_id.send_message(|m| m.content(" ").embed(|e| e
         .title(&format!("Statistics for {}", guild.name))
         .description(&format!("**Owner**: {}\n**Verification**: {}\n**Region**: {}", guild_owner, verifiaction_level, guild_region))
         .field(|f| f

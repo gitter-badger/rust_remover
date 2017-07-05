@@ -194,6 +194,18 @@ fn build_framework(f: Framework) -> Framework {
                 .exec(cmd::remind::add_reminder)
                 .check(owner_check)
                 .desc("Add an reminder for an duration\n**REQUIRED**: Bot Owner")));
+    f = f.group("Voice", |g| g
+            .prefix("voice")
+            .command("join", |c| c
+                .bucket("extended")
+                .exec(cmd::voice::join)
+                .check(owner_check)
+                .desc("Have the bot join the given voice channel\n**REQUIRED**: Bot Owner"))
+            .command("leave", |c| c
+                .bucket("simple")
+                .exec(cmd::voice::leave)
+                .check(owner_check)
+                .desc("Have the bot leave the voice channel")));
     f
 }
 

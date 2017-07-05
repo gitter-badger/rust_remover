@@ -9,8 +9,8 @@ command!(embed(_ctx, msg, _args, _text: String) {
     let s: String = _args.join(" ");
     let jsprs = JsonToDiscordEmbedObject::new();
     match jsprs.parse(s.as_str()) {
-        Ok(r) => utils::check_message(msg.channel_id.send_message(|m| m.content(" ").embed(|_| r))),
-        Err(e) => utils::check_message(msg.channel_id.send_message(|m| m.content(format!("**ERROR**\n```{}```", e).as_str())))
+        Ok(r) => utils::check_msg(msg.channel_id.send_message(|m| m.content(" ").embed(|_| r))),
+        Err(e) => utils::check_msg(msg.channel_id.send_message(|m| m.content(format!("**ERROR**\n```{}```", e).as_str())))
     };
     let _ = msg.delete();
 });

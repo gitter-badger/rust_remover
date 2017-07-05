@@ -9,7 +9,7 @@ pub mod sharekvp;
 pub mod linear_parse;
 
 
-pub fn check_message(result: SerenityResult<SerenityMessage>) {
+pub fn check_msg(result: SerenityResult<SerenityMessage>) {
     if let Err(why) = result {
         warn!("Error sending message: {:?}", why);
     }
