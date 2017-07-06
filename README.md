@@ -32,10 +32,10 @@ If cleverbot is enabled, the `CLEVERBOT_TOKEN` enviroment variable is needed.
  ## Usage
  Enviroment variables
  
- | Name                  | Description                                                       | Required                     |  
- | --------------------- | ----------------------------------------------------------------- | :--------------------------: |  
- | `DISCORD_TOKEN`       | Your Discord app token                                            | YES                          |  
- | `CLEVERBOT_TOKEN`     | Your cleverbot API token                                          | YES with `cleverbot` feature |  
- | `RUST_REMOVER_LOG4RS` | Path to the Logging configuration file (default: log4rs.yaml)¹.   | NO                           | 
+ | Name                  | Description                             | Required                     | Default        |
+ | --------------------- | --------------------------------------- | :--------------------------: |                |
+ | `DISCORD_TOKEN`       | Your Discord app token                  | YES                          |                |
+ | `CLEVERBOT_TOKEN`     | Your cleverbot API token                | YES with `cleverbot` feature |                |
+ | `RUST_REMOVER_LOG4RS` | Path to the Logging configuration file. | NO                           | `log4rs.yaml`¹ |
  
  ¹) On the yaml format & usage see the [log4rs documentation](https://docs.rs/log4rs/0.7.0/log4rs/#examples)
