@@ -8,7 +8,7 @@ If you want to use it for some reason go see the installation instructions.
 
 ### Dependencies
 - Rust nightly v1.20 (may work with stable. not tested)  
-- All rust build dependencys  
+- All rust build dependencys (they are almost all downloaded by cargo)
 - At least OpenSSL 1.1.0f  
 
 ### Linux
@@ -18,7 +18,7 @@ $ cd rust_remover
 $ cargo build
 ```
 To use Cleverbot append the flag `--features "cleverbot"` to the `cargo build` command.  
-If cleverbot is enabled, the `CLEVERBOT_TOKEN` enviroment variable is needed.  
+If cleverbot is enabled, the `CLEVERBOT_TOKEN` enviroment variable is required.  
 
 ### Windows
 
