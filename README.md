@@ -33,7 +33,7 @@ If cleverbot is enabled, the `CLEVERBOT_TOKEN` enviroment variable is needed.
  Enviroment variables
  
  | Name                  | Description                             | Required                     | Default        |
- | --------------------- | --------------------------------------- | :--------------------------: |                |
+ | --------------------- | --------------------------------------- | :--------------------------: | -------------- |
  | `DISCORD_TOKEN`       | Your Discord app token                  | YES                          |                |
  | `CLEVERBOT_TOKEN`     | Your cleverbot API token                | YES with `cleverbot` feature |                |
  | `RUST_REMOVER_LOG4RS` | Path to the Logging configuration file. | NO                           | `log4rs.yaml`¹ |
