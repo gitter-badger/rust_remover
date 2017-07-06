@@ -39,3 +39,16 @@ If cleverbot is enabled, the `CLEVERBOT_TOKEN` enviroment variable is needed.
  | `RUST_REMOVER_LOG4RS` | Path to the Logging configuration file. | NO                           | `log4rs.yaml`¹ |
  
  ¹) On the yaml format & usage see the [log4rs documentation](https://docs.rs/log4rs/0.7.0/log4rs/#examples)
+ 
+ ## Note
+ I work on this project for fun (aka shits & giggles).  
+ #### What you can expect:
+ - Updates
+ - I (try) to answer as many questions as i can
+ - Solved issues
+ 
+ #### What you can't expect:
+- Great Proficiency with either Git or Rust
+- Good "commits" (no multifile commits, etc.)
+
+If you have questions or want to contribute to the bot feel free to ask !
